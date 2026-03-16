@@ -1,9 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+/**
+ * We render a small wrapper that provides Suspense for the part that
+ * calls useSearchParams(). This satisfies Next 15/16 build rules.
+ */
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<main style={{ padding: 40 }}>Loading…</main>}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const params = useSearchParams();
   const redirectTo = params.get("redirect") || "/dashboard";
 
@@ -12,7 +24,7 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -27,13 +39,13 @@ export default function SignInPage() {
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         setError(data?.error ?? "Sign-in failed.");
-        setLoading(false);
         return;
       }
 
       window.location.href = redirectTo;
     } catch (err: any) {
       setError(err?.message ?? "Unexpected error");
+    } finally {
       setLoading(false);
     }
   };
@@ -41,19 +53,16 @@ export default function SignInPage() {
   const sendMagicLink = async () => {
     setError(null);
     setLoading(true);
-
     try {
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otpType: "magic_link" }),
       });
-
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         setError(data?.error ?? "Could not send magic link.");
       } else {
-        // Optional: inform user
         alert(data?.message ?? "Magic link sent. Check your email.");
       }
     } catch (err: any) {
@@ -64,10 +73,12 @@ export default function SignInPage() {
   };
 
   return (
-    <main style={{ padding: 40, maxWidth: 420, margin: "0 auto" }}>
+    <main
+      style={{ padding: 40, maxWidth: 420, margin: "0 auto", display: "grid", gap: 16 }}
+    >
       <h1>Sign in</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+      <form onSubmit={handlePasswordSignIn} style={{ display: "grid", gap: 12 }}>
         <label style={{ fontWeight: 600 }}>
           Email
           <input
@@ -115,3 +126,4 @@ export default function SignInPage() {
     </main>
   );
 }
+``
