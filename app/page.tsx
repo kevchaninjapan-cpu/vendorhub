@@ -16,8 +16,7 @@ export default function Home() {
           sale with professional-grade tools — without paying agent commissions.
         </p>
 
-       
- <div className="mt-10 flex flex-col sm:flex-row gap-4">
+        <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <Button href="/sell/new">Start Selling</Button>
           <Button href="/pricing" variant="secondary">View Pricing</Button>
           <Button href="/waitlist" variant="secondary">Join Waitlist</Button>
