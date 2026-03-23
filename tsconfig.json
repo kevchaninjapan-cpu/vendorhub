@@ -6,26 +6,26 @@
       "DOM.Iterable",
       "ES2020"
     ],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": false,
     "noEmit": true,
-    "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
-    "types": [
-      "node"
-    ],
-    "baseUrl": ".", //  <-- required
-    "paths": { //  <-- alias
+    // Important for @/ imports
+    "baseUrl": ".",
+    "paths": {
       "@/*": [
-        "./*"
+        "*"
       ]
     },
+    // Next.js recommended
+    "incremental": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "plugins": [
       {
         "name": "next"
@@ -33,18 +33,14 @@
     ]
   },
   "include": [
-    "next-env.d.ts", //  <-- required for Next types
+    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "types/**/*.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-  "node_modules",
-  ".next",
-  "app/api/auth/_session.old",
-  "app/api/auth/_session.old/**/*"
-
-
+    "node_modules"
   ]
 }

@@ -1,27 +1,16 @@
-import { supabaseServer } from "@/lib/supabaseServer";
-import Link from "next/link";
+// app/dashboard/page.tsx
+import { requireUser } from "@/lib/guards";
+// (Optionally) import getProfile if you gate admin content
+// import { getProfile } from "@/lib/auth";
 
-export default async function Dashboard() {
-  const supabase = await supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return (
-      <main style={{ padding: 32 }}>
-        <p>Not authenticated.</p>
-        <Link href="/auth/sign-in">Go to sign-in</Link>
-      </main>
-    );
-  }
+export default async function DashboardPage() {
+  // If you use guards, keep them – but still return a visible shell after they pass.
+  await requireUser();
 
   return (
-    <main style={{ padding: 32, display: "grid", gap: 12 }}>
-      <h2>Dashboard</h2>
-      <p>Signed in as {user.email}</p>
-
-      <form action="/api/auth/sign-out" method="post">
-        <button type="submit">Sign out</button>
-      </form>
-    </main>
+    <div className="p-8 space-y-4">
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <p className="text-slate-600">You’re signed in. Content will appear here.</p>
+    </div>
   );
 }

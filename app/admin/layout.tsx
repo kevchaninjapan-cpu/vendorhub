@@ -1,61 +1,32 @@
 // app/admin/layout.tsx
+import type { ReactNode } from "react";
 import Link from "next/link";
-import "./admin.css"; // optional if you want to add scoped styles
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          padding: 0,
-          display: "grid",
-          gridTemplateColumns: "240px 1fr",
-          minHeight: "100vh",
-          background: "#f9fafb",
-          fontFamily: "Inter, sans-serif",
-        }}
-      >
-        {/* Sidebar */}
-        <aside
-          style={{
-            background: "#111827",
-            color: "white",
-            padding: "24px 16px",
-            display: "grid",
-            gap: "20px",
-            height: "100%",
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 20 }}>Admin</h2>
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <nav className="flex items-center gap-6 text-sm mb-6 border-b pb-3">
+          <Link href="/dashboard" className="hover:underline">Overview</Link>
+          <Link href="/listings" className="hover:underline">My listings</Link>
+          <Link href="/admin" className="hover:underline font-medium">Admin home</Link>
+          <Link href="/admin/listings" className="hover:underline">All listings</Link>
+          <Link href="/admin/users" className="hover:underline">Users</Link>
+        </nav>
 
-          <nav style={{ display: "grid", gap: 12 }}>
-            <Link href="/admin" style={navLinkStyle}>
-              Dashboard
-            </Link>
-            <Link href="/admin/users" style={navLinkStyle}>
-              Users
-            </Link>
-            <Link href="/admin/properties" style={navLinkStyle}>
-              Properties
-            </Link>
-            <Link href="/admin/settings" style={navLinkStyle}>
-              Settings
-            </Link>
-          </nav>
-        </aside>
+        <div className="grid grid-cols-12 gap-6">
+          <aside className="col-span-3 space-y-2">
+            <div className="text-xs uppercase text-slate-500">Admin</div>
+            <ul className="space-y-1">
+              <li><Link href="/admin" className="hover:underline">Admin home</Link></li>
+              <li><Link href="/admin/listings" className="hover:underline">All listings</Link></li>
+              <li><Link href="/admin/users" className="hover:underline">Users</Link></li>
+            </ul>
+          </aside>
 
-        {/* Main content */}
-        <main style={{ padding: "32px" }}>{children}</main>
-      </body>
-    </html>
+          <main className="col-span-9">{children}</main>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const navLinkStyle: React.CSSProperties = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  background: "rgba(255,255,255,0.1)",
-  color: "white",
-  textDecoration: "none",
-};
