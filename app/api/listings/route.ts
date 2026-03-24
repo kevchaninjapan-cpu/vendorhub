@@ -1,26 +1,36 @@
 // app/api/listings/route.ts
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/guards";
-import { createListing } from "@/lib/db/listings";
+import { createListing, getAllListings } from "@/lib/db/listings";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET(req: Request) {
+  await requireUser(); // ensures auth cookie present
+
+  const url = new URL(req.url);
+  const includeDeleted = url.searchParams.get("includeDeleted") === "true";
+
+  const listings = await getAllListings({ includeDeleted });
+  return NextResponse.json({ listings });
+}
 
 export async function POST(req: Request) {
-  await requireUser(); // ensures auth cookie present
+  const user = await requireUser(); // expects your guard returns user/session
+
   const body = await req.json();
-  try {
-    const created = await createListing({
-      title: body.title,
-      description: body.description,
-      price_numeric: body.price_numeric ?? null,
-      price_display: body.price_display ?? null,
-      property_type: body.property_type ?? "house",
-      bedrooms: body.bedrooms ?? null,
-      bathrooms: body.bathrooms ?? null,
-      car_spaces: body.car_spaces ?? null,
-      city: body.city ?? null,
-      region: body.region ?? null,
-    });
-    return NextResponse.json({ ok: true, listing: created }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
-  }
+
+  // Minimal safe create payload
+  const created = await createListing({
+    owner_id: user.id,
+    title: body?.title ?? null,
+    description: body?.description ?? null,
+    status: body?.status ?? "draft",
+    price_numeric: body?.price_numeric ?? null,
+    price_display: body?.price_display ?? null,
+    slug: body?.slug ?? null,
+  });
+
+  return NextResponse.json({ listing: created }, { status: 201 });
 }
