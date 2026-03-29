@@ -1,73 +1,60 @@
-import { NextResponse } from "next/server";
-import { createRouteHandlerClient } from "@/lib/supabase/route";
-import { isAdminUser } from "@/lib/auth/admin";
+// app/api/admin/listings/[id]/images/route.ts
+import { NextResponse } from 'next/server'
+import { requireAdminAuth } from '@/lib/guards'
+import { createServerClient } from '@/lib/supabase/server'
 
-export const dynamic = "force-dynamic";
-
-// Mirror the “hardened” pattern from your upload route:
-// - auth + admin gate
-// - listing existence check
-// - status guard
-// - strong error handling + consistent logs
-// - returns useful JSON payload
+export const runtime = 'nodejs'
 
 export async function POST(
-  _req: Request,
-  { params }: { params: { id: string } } // ✅ NOT a Promise
+  req: Request,
+  { params }: { params: { id: string } }
 ) {
-  const listingId = params.id;
+  // ✅ Enforce admin
+  await requireAdminAuth()
 
-  const supabase = await createRouteHandlerClient();
+  const { id: listingId } = params
 
-  // Auth + Admin gate (same pattern as your upload route)
-  const { data, error: authErr } = await supabase.auth.getUser();
-  if (authErr) console.error("[API_RESTORE_AUTH_ERROR]", authErr);
+  const supabase = await createServerClient()
 
-  const user = data?.user;
-  if (!user || !isAdminUser(user)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const formData = await req.formData()
+  const file = formData.get('file') as File | null
 
-  // Ensure listing exists and read current status (prevents nonsense updates)
-  const { data: listing, error: readErr } = await supabase
-    .from("listings")
-    .select("id, status")
-    .eq("id", listingId)
-    .maybeSingle();
-
-  if (readErr) {
-    console.error("[API_RESTORE_READ_ERROR]", readErr);
-    return NextResponse.json({ error: "Unable to read listing" }, { status: 500 });
-  }
-  if (!listing) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  // Only archived listings can be restored (guard)
-  if (listing.status !== "archived") {
+  if (!file) {
     return NextResponse.json(
-      { error: "Only archived listings can be restored" },
+      { error: 'No file provided' },
       { status: 400 }
-    );
+    )
   }
 
-  // Update + return the updated row (more useful than {ok:true} only)
-  const { data: updated, error: updErr } = await supabase
-    .from("listings")
-    .update({ status: "draft" })
-    .eq("id", listingId)
-    .select("id, status, updated_at")
-    .single();
+  const ext = file.name.split('.').pop()
+  const path = `${listingId}/${crypto.randomUUID()}.${ext}`
 
-  if (updErr) {
-    console.error("[API_RESTORE_UPDATE_ERROR]", updErr);
-    return NextResponse.json({ error: "Unable to restore listing" }, { status: 500 });
+  const { error: uploadErr } = await supabase.storage
+    .from('listing-photos')
+    .upload(path, file, { upsert: false })
+
+  if (uploadErr) {
+    console.error('[IMAGE_UPLOAD_ERROR]', uploadErr)
+    return NextResponse.json(
+      { error: uploadErr.message },
+      { status: 500 }
+    )
   }
 
-  return NextResponse.json({
-    ok: true,
-    listing: updated,
-    from: listing.status,
-    to: "draft",
-  });
+  const { error: dbErr } = await supabase
+    .from('listing_images')
+    .insert({
+      listing_id: listingId,
+      storage_path: path,
+    })
+
+  if (dbErr) {
+    console.error('[IMAGE_DB_INSERT_ERROR]', dbErr)
+    return NextResponse.json(
+      { error: dbErr.message },
+      { status: 500 }
+    )
+  }
+
+  return NextResponse.json({ ok: true }, { status: 201 })
 }
