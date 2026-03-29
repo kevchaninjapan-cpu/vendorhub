@@ -31,19 +31,20 @@ export async function POST(
   }
   if (!listing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  // Only allow archive from active/under_offer/sold/draft? Adjust to your policy.
   const allowed = new Set(['draft', 'active', 'under_offer', 'sold'])
   if (!allowed.has(listing.status)) {
-    return NextResponse.json({ error: 'Invalid status for withdraw' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid status for archive' }, { status: 400 })
   }
 
   const { error: updErr } = await supabase
     .from('listings')
-    .update({ status: 'withdrawn' })
+    .update({ status: 'archived' })
     .eq('id', id)
 
   if (updErr) {
     console.error('[API_ARCHIVE_UPDATE_ERROR]', updErr)
-    return NextResponse.json({ error: 'Unable to withdraw listing' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to archive listing' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
