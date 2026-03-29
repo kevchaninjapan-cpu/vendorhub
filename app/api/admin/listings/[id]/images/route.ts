@@ -1,172 +1,73 @@
-// app/api/admin/listings/[id]/images/route.ts
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { createRouteHandlerClient } from "@/lib/supabase/route";
+import { isAdminUser } from "@/lib/auth/admin";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// ✅ Your PUBLIC bucket (confirmed)
-const BUCKET = "listing-photos";
+// Mirror the “hardened” pattern from your upload route:
+// - auth + admin gate
+// - listing existence check
+// - status guard
+// - strong error handling + consistent logs
+// - returns useful JSON payload
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function sanitizeFilename(name: string) {
-  return name
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9._-]/g, "");
-}
-
-function parseBool(v: FormDataEntryValue | null) {
-  const s = String(v ?? "").toLowerCase();
-  return s === "true" || s === "1" || s === "yes" || s === "on";
-}
-
-async function getSupabaseServer() {
-  // ✅ Next.js 15/16 cookies() is async
-  const cookieStore = await cookies();
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        // In route handlers we CAN set cookies (for auth refresh if needed)
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-}
-
-// -----------------------------
-// POST /api/admin/listings/:id/images
-// multipart/form-data:
-// - file (required)
-// - alt (optional)
-// - is_cover (optional: true/false)
-// -----------------------------
 export async function POST(
-  req: Request,
-  ctx: { params: { id: string } | Promise<{ id: string }> }
+  _req: Request,
+  { params }: { params: { id: string } } // ✅ NOT a Promise
 ) {
-  // 🔒 Admin only
-  await requireAdmin();
+  const listingId = params.id;
 
-  const { id: listingId } = await Promise.resolve(ctx.params);
+  const supabase = await createRouteHandlerClient();
 
-  try {
-    const form = await req.formData();
+  // Auth + Admin gate (same pattern as your upload route)
+  const { data, error: authErr } = await supabase.auth.getUser();
+  if (authErr) console.error("[API_RESTORE_AUTH_ERROR]", authErr);
 
-    const file = form.get("file");
-    const alt = String(form.get("alt") ?? "").trim() || null;
-    const isCover = parseBool(form.get("is_cover"));
-
-    if (!(file instanceof File)) {
-      return NextResponse.json(
-        { error: "Missing file. Provide multipart form-data field 'file'." },
-        { status: 400 }
-      );
-    }
-
-    // Basic validation
-    const maxBytes = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxBytes) {
-      return NextResponse.json(
-        { error: "File too large (max 10MB)." },
-        { status: 413 }
-      );
-    }
-
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json(
-        { error: "Invalid file type. Must be image/*." },
-        { status: 400 }
-      );
-    }
-
-    const supabase = await getSupabaseServer();
-
-    // ✅ Storage key
-    const safeName = sanitizeFilename(file.name || "image");
-    const storagePath = `listings/${listingId}/${crypto.randomUUID()}-${safeName}`;
-
-    // ✅ Upload to PUBLIC bucket listing-photos
-    const upload = await supabase.storage.from(BUCKET).upload(storagePath, file, {
-      contentType: file.type,
-      upsert: false,
-      cacheControl: "3600",
-    });
-
-    if (upload.error) {
-      return NextResponse.json({ error: upload.error.message }, { status: 500 });
-    }
-
-    // ✅ Determine next sort_order
-    const { data: maxRow, error: maxErr } = await supabase
-      .from("listing_images")
-      .select("sort_order")
-      .eq("listing_id", listingId)
-      .order("sort_order", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (maxErr) {
-      return NextResponse.json({ error: maxErr.message }, { status: 500 });
-    }
-
-    const nextSortOrder = (maxRow?.sort_order ?? 0) + 1;
-
-    // ✅ If is_cover=true, unset previous cover for this listing
-    if (isCover) {
-      const { error: unsetErr } = await supabase
-        .from("listing_images")
-        .update({ is_cover: false })
-        .eq("listing_id", listingId)
-        .eq("is_cover", true);
-
-      if (unsetErr) {
-        return NextResponse.json({ error: unsetErr.message }, { status: 500 });
-      }
-    }
-
-    // ✅ Insert DB row into listing_images with storage_path
-    const { data: inserted, error: insertErr } = await supabase
-      .from("listing_images")
-      .insert({
-        listing_id: listingId,
-        storage_path: storagePath,
-        alt,
-        sort_order: nextSortOrder,
-        is_cover: isCover,
-      })
-      .select("id, listing_id, storage_path, alt, sort_order, is_cover, created_at")
-      .single();
-
-    if (insertErr) {
-      return NextResponse.json({ error: insertErr.message }, { status: 500 });
-    }
-
-    // ✅ Return public URL for convenience (bucket listing-photos is public)
-    const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
-
-    return NextResponse.json(
-      {
-        image: inserted,
-        publicUrl: pub?.publicUrl ?? null,
-      },
-      { status: 201 }
-    );
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  const user = data?.user;
+  if (!user || !isAdminUser(user)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  // Ensure listing exists and read current status (prevents nonsense updates)
+  const { data: listing, error: readErr } = await supabase
+    .from("listings")
+    .select("id, status")
+    .eq("id", listingId)
+    .maybeSingle();
+
+  if (readErr) {
+    console.error("[API_RESTORE_READ_ERROR]", readErr);
+    return NextResponse.json({ error: "Unable to read listing" }, { status: 500 });
+  }
+  if (!listing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Only archived listings can be restored (guard)
+  if (listing.status !== "archived") {
+    return NextResponse.json(
+      { error: "Only archived listings can be restored" },
+      { status: 400 }
+    );
+  }
+
+  // Update + return the updated row (more useful than {ok:true} only)
+  const { data: updated, error: updErr } = await supabase
+    .from("listings")
+    .update({ status: "draft" })
+    .eq("id", listingId)
+    .select("id, status, updated_at")
+    .single();
+
+  if (updErr) {
+    console.error("[API_RESTORE_UPDATE_ERROR]", updErr);
+    return NextResponse.json({ error: "Unable to restore listing" }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    listing: updated,
+    from: listing.status,
+    to: "draft",
+  });
 }
-``

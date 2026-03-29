@@ -1,22 +1,29 @@
-// utils/supabase/server.ts
-import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import type { Database } from "@/types/supabase";
 
-/**
- * Async server client factory (works across Next.js 15/16 variants where cookies() can be async).
- * NOTE: Callers must now use:  const supabase = await createSupabaseServerClient();
- */
-export async function createSupabaseServerClient() {
+// If you already have Database types, swap this import in.
+// import type { Database } from "@/types/supabase";
+
+export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch {
+            // Server Components can't set cookies; middleware/route handlers can.
+          }
+        },
       },
     }
   );

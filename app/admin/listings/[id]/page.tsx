@@ -1,7 +1,16 @@
 // app/admin/listings/[id]/page.tsx
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/requireAdmin";
 import ImageUploader from "./ImageUploader";
 import ImageGallery from "./ImageGallery";
+import { createServerClient } from "@supabase/ssr";
+
+
+
+const supabase = await createServerClient()
+const { data: { user } } = await supabase.auth.getUser()
+
+if (!user) redirect('/login')
 
 export const dynamic = "force-dynamic";
 

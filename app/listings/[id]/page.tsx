@@ -1,209 +1,240 @@
-// app/listings/[id]/page.tsx
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-import { notFound, permanentRedirect } from "next/navigation";
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import { notFound } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase/server'
 
-type Listing = {
-  id: string;
-  title: string | null;
-  description: string | null;
-  slug: string | null;
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-  price_display: string | null;
-  price_numeric: number | null;
+/**
+ * Day 20 hardening:
+ * - Only expose ACTIVE listings on public route
+ * - Per-listing SEO metadata + OG image (first listing photo)
+ * - Server-side errors logged; user gets clean notFound()
+ *
+ * NOTE: If next/image blocks Supabase URLs, add your Supabase storage host to
+ * next.config.js -> images.remotePatterns. (Recommended for full optimization.)
+ */
 
-  status: string | null;
+type Params = { id: string }
 
-  bedrooms: number | null;
-  bathrooms: number | null;
-  car_spaces: number | null;
-
-  address_line1: string | null;
-  address_line2: string | null;
-  suburb: string | null;
-  city: string | null;
-  region: string | null;
-  postcode: string | null;
-
-  created_at: string | null;
-  updated_at: string | null;
-  published_at: string | null;
-  deleted_at: string | null;
-};
-
-type ListingImage = {
-  id: string;
-  listing_id: string;
-  storage_path: string | null; // ✅ your actual column
-  alt: string | null;
-  sort_order: number | null;
-  is_cover: boolean | null;
-  created_at: string | null;
-};
-
-// ✅ Your public bucket (from your SQL output)
-const LISTING_IMAGES_BUCKET = "listing-photos";
-
-const LISTING_SELECT = `
-  id,
-  title,
-  description,
-  slug,
-  price_display,
-  price_numeric,
-  status,
-  bedrooms,
-  bathrooms,
-  car_spaces,
-  address_line1,
-  address_line2,
-  suburb,
-  city,
-  region,
-  postcode,
-  created_at,
-  updated_at,
-  published_at,
-  deleted_at
-` as const;
-
-// ✅ UUID detector so we never compare slug to uuid
-function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
-  );
+function buildTitle(listing: any) {
+  const location = [listing?.suburb, listing?.city].filter(Boolean).join(', ')
+  const base = listing?.title || 'Listing'
+  return location ? `${base} · ${location}` : base
 }
 
-async function getSupabase() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: () => {},
-      },
-    }
-  );
+function safeText(input: unknown, maxLen = 160) {
+  const s = String(input ?? '').trim()
+  if (!s) return ''
+  return s.length > maxLen ? `${s.slice(0, maxLen - 1)}…` : s
 }
 
-async function getListingByIdOrSlug(idOrSlug: string) {
-  const supabase = await getSupabase();
-  const base = supabase.from("listings").select(LISTING_SELECT).limit(1);
+export async function generateMetadata(
+  { params }: { params: Promise<Params> }
+): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createServerClient()
 
-  const { data, error } = isUuid(idOrSlug)
-    ? await base.eq("id", idOrSlug)
-    : await base.eq("slug", idOrSlug);
+  // Only fetch fields needed for metadata (fast + safe)
+  const { data: listing, error: listingErr } = await supabase
+    .from('listings')
+    .select('id, title, suburb, city, status')
+    .eq('id', id)
+    .maybeSingle()
 
-  if (error) throw new Error(error.message);
-  return (data?.[0] ?? null) as Listing | null;
-}
-
-async function getCoverImageAndUrl(listingId: string) {
-  const supabase = await getSupabase();
-
-  // ✅ FIX: use storage_path + alt (no url column exists)
-  const { data, error } = await supabase
-    .from("listing_images")
-    .select("id, listing_id, storage_path, alt, sort_order, is_cover, created_at")
-    .eq("listing_id", listingId)
-    .order("is_cover", { ascending: false })
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true })
-    .limit(1);
-
-  if (error) throw new Error(error.message);
-
-  const cover = (data?.[0] ?? null) as ListingImage | null;
-
-  if (!cover?.storage_path) {
-    return { cover: null, coverUrl: null };
+  if (listingErr) {
+    console.error('[PUBLIC_LISTING_METADATA_LISTING_ERROR]', listingErr)
+    return { title: 'Listing not available | VendorHub' }
   }
 
-  // ✅ Public bucket: build a public URL
-  const { data: publicData } = supabase.storage
-    .from(LISTING_IMAGES_BUCKET)
-    .getPublicUrl(cover.storage_path);
+  // Do not leak non-active listings via metadata
+  if (!listing || listing.status !== 'active') {
+    return { title: 'Listing not available | VendorHub' }
+  }
 
-  const coverUrl = publicData?.publicUrl ?? null;
+  // Attempt OG image from first listing photo (optional)
+  let ogImageUrl: string | undefined
+  const { data: firstImage, error: imgErr } = await supabase
+    .from('listing_images')
+    .select('storage_path, created_at')
+    .eq('listing_id', id)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
 
-  return { cover, coverUrl };
+  if (imgErr) {
+    console.error('[PUBLIC_LISTING_METADATA_IMAGE_ERROR]', imgErr)
+  } else if (firstImage?.storage_path) {
+    const { data } = supabase.storage.from('listing-photos').getPublicUrl(firstImage.storage_path)
+    ogImageUrl = data.publicUrl
+  }
+
+  const title = `${buildTitle(listing)} | VendorHub`
+  const description = safeText(
+    `View details for ${listing.title || 'this listing'} on VendorHub.`,
+    160
+  )
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendorhub.nz'
+  const canonical = `${siteUrl}/listings/${id}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: canonical,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
+    },
+    twitter: {
+      card: ogImageUrl ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
+    },
+  }
 }
 
-export default async function ListingPage({
+export default async function PublicListingPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<Params>
 }) {
-  const { id: idOrSlug } = await params;
+  const { id } = await params
+  const supabase = await createServerClient()
 
-  const listing = await getListingByIdOrSlug(idOrSlug);
-  if (!listing) notFound();
+  // Fetch listing (you can slim this down later once your schema is stable)
+  const { data: listing, error: listingErr } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
 
-  // ✅ Public safety (tweak if you want drafts visible in dev)
-  if (listing.deleted_at) notFound();
-  if ((listing.status ?? "").toLowerCase() !== "active") notFound();
-
-  // ✅ Canonical redirect: UUID -> slug (if slug exists)
-  if (isUuid(idOrSlug) && listing.slug) {
-    permanentRedirect(`/listings/${listing.slug}`);
+  if (listingErr) {
+    console.error('[PUBLIC_LISTING_QUERY_ERROR]', listingErr)
+    notFound()
   }
 
-  const { cover, coverUrl } = await getCoverImageAndUrl(listing.id);
+  // Hard rule: public route only shows active listings
+  if (!listing || listing.status !== 'active') {
+    notFound()
+  }
 
-  const address = [listing.address_line1, listing.suburb, listing.city, listing.region]
-    .filter(Boolean)
-    .join(", ");
+  // Fetch images
+  const { data: images, error: imgErr } = await supabase
+    .from('listing_images')
+    .select('id, storage_path, created_at')
+    .eq('listing_id', id)
+    .order('created_at', { ascending: true })
 
-  const priceText =
-    (listing.price_display && listing.price_display.trim()) ||
-    (listing.price_numeric !== null
-      ? new Intl.NumberFormat("en-NZ", {
-          style: "currency",
-          currency: "NZD",
-          maximumFractionDigits: 0,
-        }).format(listing.price_numeric)
-      : "—");
+  if (imgErr) {
+    console.error('[PUBLIC_LISTING_IMAGES_QUERY_ERROR]', imgErr)
+  }
+
+  const bucket = supabase.storage.from('listing-photos')
+  const imageUrls =
+    images?.map((img) => {
+      const { data } = bucket.getPublicUrl(img.storage_path)
+      return { id: img.id, url: data.publicUrl }
+    }) ?? []
+
+  const title = listing.title ?? 'Listing'
+  const location = [listing.suburb, listing.city].filter(Boolean).join(', ')
 
   return (
-    <div className="mx-auto max-w-5xl p-6 space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {listing.title ?? "Untitled listing"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{address || "—"}</p>
-        </div>
+    <main className="mx-auto max-w-5xl p-6">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold">{title}</h1>
+        {location ? <p className="mt-1 text-gray-700">{location}</p> : null}
+        <p className="mt-1 text-xs text-gray-500">Listing ID: {listing.id}</p>
+      </header>
 
-        <div className="text-right">
-          <div className="text-2xl font-semibold">{priceText}</div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            {listing.bedrooms ?? "—"} bd • {listing.bathrooms ?? "—"} ba •{" "}
-            {listing.car_spaces ?? "—"} car
+      {/* Gallery */}
+      {imageUrls.length ? (
+        <section className="mb-8">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {imageUrls.map((img, idx) => (
+              <div
+                key={img.id}
+                className="relative aspect-[4/3] overflow-hidden rounded border bg-gray-50"
+              >
+                <Image
+                  src={img.url}
+                  alt={`${title} photo ${idx + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                  className="object-cover"
+                  // If you haven't configured next/image remotePatterns yet, this prevents runtime blocking:
+                  // Remove once next.config.js includes your Supabase storage domain.
+                  unoptimized
+                  priority={idx === 0}
+                />
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
+        </section>
+      ) : (
+        <section className="mb-8 rounded border p-4 text-sm text-gray-600">
+          No photos available yet.
+        </section>
+      )}
 
-      {coverUrl ? (
-        <div className="overflow-hidden rounded-2xl border bg-white">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={coverUrl}
-            alt={cover?.alt ?? listing.title ?? "Listing image"}
-            className="w-full h-auto"
-          />
-        </div>
-      ) : null}
+      {/* Details (keep flexible because your schema may evolve) */}
+      <section className="rounded border p-5">
+        <h2 className="text-lg font-semibold">Details</h2>
 
-      {listing.description ? (
-        <div className="rounded-2xl border bg-white p-6">
-          <h2 className="text-lg font-medium">Description</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
-            {listing.description}
-          </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {listing.price != null ? (
+            <div>
+              <div className="text-xs text-gray-500">Price</div>
+              <div className="font-medium">{String(listing.price)}</div>
+            </div>
+          ) : null}
+
+          {listing.bedrooms != null ? (
+            <div>
+              <div className="text-xs text-gray-500">Bedrooms</div>
+              <div className="font-medium">{String(listing.bedrooms)}</div>
+            </div>
+          ) : null}
+
+          {listing.bathrooms != null ? (
+            <div>
+              <div className="text-xs text-gray-500">Bathrooms</div>
+              <div className="font-medium">{String(listing.bathrooms)}</div>
+            </div>
+          ) : null}
+
+          {listing.carparks != null ? (
+            <div>
+              <div className="text-xs text-gray-500">Carparks</div>
+              <div className="font-medium">{String(listing.carparks)}</div>
+            </div>
+          ) : null}
+
+          {listing.updated_at ? (
+            <div>
+              <div className="text-xs text-gray-500">Last updated</div>
+              <div className="font-medium">
+                {new Date(listing.updated_at).toLocaleString()}
+              </div>
+            </div>
+          ) : null}
         </div>
-      ) : null}
-    </div>
-  );
+
+        {listing.description ? (
+          <div className="mt-5">
+            <div className="text-xs text-gray-500">Description</div>
+            <p className="mt-2 whitespace-pre-line text-gray-800">
+              {String(listing.description)}
+            </p>
+          </div>
+        ) : null}
+      </section>
+    </main>
+  )
 }
