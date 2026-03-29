@@ -1,60 +1,131 @@
-// app/api/admin/listings/[id]/images/route.ts
 import { NextResponse } from 'next/server'
-import { requireAdminAuth } from '@/lib/guards'
-import { createServerClient } from '@/lib/supabase/server'
+import { createRouteHandlerClient } from '@/lib/supabase/route'
+import { isAdminUser } from '@/lib/auth/admin'
 
+export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+const MAX_BYTES = 8 * 1024 * 1024 // 8MB
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+
+function extFromType(type: string) {
+  switch (type) {
+    case 'image/jpeg':
+      return 'jpg'
+    case 'image/png':
+      return 'png'
+    case 'image/webp':
+      return 'webp'
+    default:
+      return 'bin'
+  }
+}
+
+function safeBaseName(name: string) {
+  return (name || 'upload')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 40)
+}
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // ✅ Enforce admin
-  await requireAdminAuth()
+  const { id: listingId } = await params
+  const supabase = await createRouteHandlerClient()
 
-  const { id: listingId } = params
+  // Auth + admin gate
+  const { data, error: authErr } = await supabase.auth.getUser()
+  if (authErr) console.error('[API_ADMIN_IMAGES_AUTH_ERROR]', authErr)
 
-  const supabase = await createServerClient()
-
-  const formData = await req.formData()
-  const file = formData.get('file') as File | null
-
-  if (!file) {
-    return NextResponse.json(
-      { error: 'No file provided' },
-      { status: 400 }
-    )
+  const user = data?.user
+  if (!user || !isAdminUser(user)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const ext = file.name.split('.').pop()
-  const path = `${listingId}/${crypto.randomUUID()}.${ext}`
+  // Ensure listing exists (prevents orphan image rows)
+  const { data: listing, error: listingErr } = await supabase
+    .from('listings')
+    .select('id')
+    .eq('id', listingId)
+    .maybeSingle()
 
-  const { error: uploadErr } = await supabase.storage
-    .from('listing-photos')
-    .upload(path, file, { upsert: false })
+  if (listingErr) {
+    console.error('[API_ADMIN_IMAGES_LISTING_READ_ERROR]', listingErr)
+    return NextResponse.json({ error: 'Unable to read listing' }, { status: 500 })
+  }
+  if (!listing) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  // Parse form-data
+  let formData: FormData
+  try {
+    formData = await req.formData()
+  } catch (e) {
+    console.error('[API_ADMIN_IMAGES_FORMDATA_ERROR]', e)
+    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+  }
+
+  const file = formData.get('file')
+  if (!(file instanceof File)) {
+    return NextResponse.json({ error: 'Missing file field "file"' }, { status: 400 })
+  }
+
+  if (!ALLOWED_TYPES.has(file.type)) {
+    return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 })
+  }
+
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: 'File too large' }, { status: 400 })
+  }
+
+  const ext = extFromType(file.type)
+  const base = safeBaseName(file.name)
+  const storagePath = `listings/${listingId}/${crypto.randomUUID()}-${base}.${ext}`
+
+  // Upload to storage
+  const bucket = supabase.storage.from('listing-photos')
+  const { error: uploadErr } = await bucket.upload(storagePath, file, {
+    contentType: file.type,
+    upsert: false,
+  })
 
   if (uploadErr) {
-    console.error('[IMAGE_UPLOAD_ERROR]', uploadErr)
-    return NextResponse.json(
-      { error: uploadErr.message },
-      { status: 500 }
-    )
+    console.error('[API_ADMIN_IMAGES_UPLOAD_ERROR]', uploadErr)
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
   }
 
-  const { error: dbErr } = await supabase
+  // Insert DB row
+  const { data: row, error: insertErr } = await supabase
     .from('listing_images')
-    .insert({
-      listing_id: listingId,
-      storage_path: path,
-    })
+    .insert({ listing_id: listingId, storage_path: storagePath })
+    .select('id, listing_id, storage_path, created_at')
+    .single()
 
-  if (dbErr) {
-    console.error('[IMAGE_DB_INSERT_ERROR]', dbErr)
-    return NextResponse.json(
-      { error: dbErr.message },
-      { status: 500 }
-    )
+  if (insertErr) {
+    console.error('[API_ADMIN_IMAGES_DB_INSERT_ERROR]', insertErr)
+    // best-effort cleanup
+    try {
+      await bucket.remove([storagePath])
+    } catch (e) {
+      console.error('[API_ADMIN_IMAGES_CLEANUP_ERROR]', e)
+    }
+    return NextResponse.json({ error: 'Database insert failed' }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true }, { status: 201 })
+  const { data: pub } = bucket.getPublicUrl(storagePath)
+
+  return NextResponse.json(
+    {
+      ok: true,
+      image: {
+        ...row,
+        publicUrl: pub.publicUrl,
+      },
+    },
+    { status: 201 }
+  )
 }

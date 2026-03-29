@@ -6,9 +6,9 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
   const supabase = await createRouteHandlerClient()
 
   const { data, error: authErr } = await supabase.auth.getUser()
@@ -32,10 +32,7 @@ export async function POST(
   if (!listing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   if (listing.status !== 'archived') {
-    return NextResponse.json(
-      { error: 'Only archived listings can be restored' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Only archived listings can be restored' }, { status: 400 })
   }
 
   const { error: updErr } = await supabase
@@ -50,4 +47,3 @@ export async function POST(
 
   return NextResponse.json({ ok: true })
 }
-``

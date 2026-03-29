@@ -4,11 +4,13 @@ import { isAdminUser } from '@/lib/auth/admin'
 
 export const dynamic = 'force-dynamic'
 
+type Params = Promise<{ id: string }>
+
 export async function POST(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
-  const { id } = params
+  const { id } = await params
   const supabase = await createRouteHandlerClient()
 
   const { data, error: authErr } = await supabase.auth.getUser()
@@ -48,4 +50,3 @@ export async function POST(
 
   return NextResponse.json({ ok: true })
 }
-``
