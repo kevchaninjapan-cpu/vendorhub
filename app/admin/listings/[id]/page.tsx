@@ -1,9 +1,9 @@
 // app/admin/listings/[id]/page.tsx
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireAdminAuth } from '@/lib/guards'
 import ImageUploader from "./ImageUploader";
 import ImageGallery from "./ImageGallery";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient } from '@/lib/supabase/server'
 
 
 
@@ -19,7 +19,7 @@ export default async function AdminListingEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
+  await requireAdminAuth();
   const { id: listingId } = await params;
 
   return (

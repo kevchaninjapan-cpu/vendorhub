@@ -4,7 +4,7 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireAdminAuth } from '@/lib/guards'
 
 const BUCKET = "listing-photos";
 
@@ -20,7 +20,7 @@ type ImageRow = {
 
 async function getSupabaseServer() {
   // 🔒 ensure only admins can run any of these actions
-  await requireAdmin();
+await requireAdminAuth()
 
   const cookieStore = await cookies();
 

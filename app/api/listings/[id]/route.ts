@@ -1,6 +1,6 @@
 // app/api/listings/[id]/route.ts
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/guards";
+import { requireAuth } from '@/lib/guards'
 import { getListingById, softDeleteListing, updateListing } from "@/lib/db/listings";
 
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ export async function GET(
   _req: Request,
   ctx: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  await requireUser();
+  await requireAuth();
 
   const { id } = await Promise.resolve(ctx.params);
   const listing = await getListingById(id);
@@ -22,7 +22,7 @@ export async function PATCH(
   req: Request,
   ctx: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  await requireUser();
+await requireAuth()
 
   const { id } = await Promise.resolve(ctx.params);
   const body = await req.json();
@@ -49,7 +49,7 @@ export async function DELETE(
   _req: Request,
   ctx: { params: { id: string } | Promise<{ id: string }> }
 ) {
-  await requireUser();
+await requireAuth()
 
   const { id } = await Promise.resolve(ctx.params);
   const deleted = await softDeleteListing(id);

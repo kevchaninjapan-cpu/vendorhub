@@ -1,7 +1,7 @@
 // app/admin/listings/[id]/ImageGallery.tsx
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireAdminAuth } from '@/lib/guards'
 import ImageGalleryClient from "./ImageGalleryClient";
 
 const BUCKET = "listing-photos";
@@ -17,7 +17,7 @@ type ImageRow = {
 };
 
 export default async function ImageGallery({ listingId }: { listingId: string }) {
-  await requireAdmin();
+await requireAdminAuth()
 
   const cookieStore = await cookies();
   const supabase = createServerClient(

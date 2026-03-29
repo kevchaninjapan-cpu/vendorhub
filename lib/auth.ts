@@ -1,7 +1,12 @@
 import 'server-only'
 import { createServerClient } from '@/lib/supabase/server'
+import type { User } from '@supabase/supabase-js'
 
-export async function requireUser() {
+/**
+ * Returns the authenticated user or null.
+ * Does NOT redirect.
+ */
+export async function requireUser(): Promise<User | null> {
   const supabase = await createServerClient()
   const { data, error } = await supabase.auth.getUser()
 
@@ -13,7 +18,11 @@ export async function requireUser() {
   return data?.user ?? null
 }
 
-export async function requireAdmin() {
+/**
+ * Returns the authenticated admin user or null.
+ * Does NOT redirect.
+ */
+export async function requireAdmin(): Promise<User | null> {
   const user = await requireUser()
   if (!user) return null
 
@@ -25,3 +34,4 @@ export async function requireAdmin() {
 
   return user
 }
+``

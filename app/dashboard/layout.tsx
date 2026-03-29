@@ -2,7 +2,7 @@
 import "server-only";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { requireUser } from "@/lib/guards";
+import { requireAuth } from '@/lib/guards'
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   // Protects all /dashboard/** routes
-  await requireUser();
+await requireAuth()
 
   return (
     <div className="min-h-[100svh] bg-slate-50 text-slate-900">
