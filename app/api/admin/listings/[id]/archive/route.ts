@@ -31,7 +31,6 @@ export async function POST(
   }
   if (!listing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Only allow archive from active/under_offer/sold/draft? Adjust to your policy.
   const allowed = new Set(['draft', 'active', 'under_offer', 'sold'])
   if (!allowed.has(listing.status)) {
     return NextResponse.json({ error: 'Invalid status for archive' }, { status: 400 })
@@ -49,3 +48,4 @@ export async function POST(
 
   return NextResponse.json({ ok: true })
 }
+``
