@@ -8,11 +8,11 @@ export const revalidate = 0;
 
 // Allowed listing_status transitions
 const ALLOWED_TRANSITIONS: Record<string, Set<string>> = {
-  draft: new Set(["active", "archived"]),
-  active: new Set(["under_offer", "sold", "archived"]),
-  under_offer: new Set(["sold", "archived"]),
-  sold: new Set(["archived"]),
-  archived: new Set(["draft"]),
+  draft: new Set(["active", "withdrawn"]),
+  active: new Set(["under_offer", "sold", "withdrawn"]),
+  under_offer: new Set(["sold", "withdrawn"]),
+  sold: new Set(["withdrawn"]),
+  withdrawn: new Set(["draft"]),
 };
 
 function canTransition(from: string, to: string) {
@@ -99,7 +99,7 @@ export default async function AdminListingDetailPage({
 
     const { error: updErr } = await supabase
       .from("listings")
-      .update({ status: nextStatus })
+      .update({ status: nextStatus as typeof listing.status })
       .eq("id", id);
 
     if (updErr) {
@@ -129,13 +129,13 @@ export default async function AdminListingDetailPage({
     }
 
     const from = String(current.status ?? "");
-    if (!canTransition(from, "archived")) {
-      throw new Error(`Invalid status transition: ${from} → archived`);
+    if (!canTransition(from, "withdrawn")) {
+      throw new Error(`Invalid status transition: ${from} → withdrawn`);
     }
 
     const { error: updErr } = await supabase
       .from("listings")
-      .update({ status: "archived" })
+      .update({ status: "withdrawn" })
       .eq("id", id);
 
     if (updErr) {
@@ -232,7 +232,7 @@ export default async function AdminListingDetailPage({
             <option value="active">active</option>
             <option value="under_offer">under_offer</option>
             <option value="sold">sold</option>
-            <option value="archived">archived</option>
+            <option value="withdrawn">withdrawn</option>
           </select>
 
           <SubmitButton className="rounded bg-black px-3 py-2 text-sm font-medium text-white disabled:opacity-50">

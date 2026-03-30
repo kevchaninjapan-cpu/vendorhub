@@ -9,13 +9,13 @@ import { createServerClient } from '@/lib/supabase/server'
  */
 
 export type ListingInsert = {
-  owner_id?: string
-  title?: string | null
+  owner_id: string
+  title: string
   description?: string | null
   price_numeric?: number | null
   price_display?: string | null
   status?: 'draft' | 'active' | 'under_offer' | 'sold' | 'withdrawn'
-  property_type?: string | null
+  property_type?: 'house' | 'apartment' | 'townhouse' | 'unit' | 'section' | 'lifestyle' | 'rural' | 'other' | null
   bedrooms?: number | null
   bathrooms?: number | null
   car_spaces?: number | null
@@ -108,7 +108,7 @@ export async function updateListing(id: string, patch: ListingUpdate) {
 
 /**
  * Soft delete: sets deleted_at timestamp.
- * Does NOT change enum status (because your enum has no "archived").
+ * Does NOT change enum status 
  */
 export async function softDeleteListing(id: string) {
   const supabase = await getSupabase()

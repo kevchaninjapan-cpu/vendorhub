@@ -8,8 +8,8 @@ import type { Database } from "@/types/supabase";
 type Listing = Database["public"]["Tables"]["listings"]["Row"];
 type DbUpdate = Database["public"]["Tables"]["listings"]["Update"];
 
-// ----- UI status (superset; includes "archived") -----
-const StatusValues = ["draft", "active", "under_offer", "sold", "withdrawn", "archived"] as const;
+// ----- UI status (superset; includes "withdrawn") -----
+const StatusValues = ["draft", "active", "under_offer", "sold", "withdrawn"] as const;
 type UiStatus = (typeof StatusValues)[number];
 
 // Build the request body type we POST to /api/listings/update:
@@ -232,8 +232,8 @@ export default function EditListingForm({ initial }: Props) {
           <option value="under_offer">Under offer</option>
           <option value="sold">Sold</option>
           <option value="withdrawn">Withdrawn</option>
-          {/* "archived" is UI-only; server maps to DB enum */}
-          <option value="archived">Archived</option>
+         
+          
         </select>
       </div>
 

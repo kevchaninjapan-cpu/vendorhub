@@ -11,7 +11,7 @@ export async function archiveListingAction(listingId: string) {
 
   const { error } = await supabase
     .from("listings")
-    .update({ status: "archived" })
+    .update({ status: "withdrawn" })
     .eq("id", listingId);
 
   if (error) {

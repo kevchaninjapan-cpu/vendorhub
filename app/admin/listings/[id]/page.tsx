@@ -12,7 +12,7 @@ function pillClass(status?: string) {
   if (s === "draft") return "bg-slate-50 text-slate-700 ring-slate-200";
   if (s === "under_offer") return "bg-amber-50 text-amber-700 ring-amber-200";
   if (s === "sold") return "bg-purple-50 text-purple-700 ring-purple-200";
-  if (s === "archived") return "bg-zinc-50 text-zinc-700 ring-zinc-200";
+  if (s === "withdrawn") return "bg-zinc-50 text-zinc-700 ring-zinc-200";
   return "bg-slate-50 text-slate-700 ring-slate-200";
 }
 
@@ -98,7 +98,7 @@ export default async function AdminListingDetailPage({
             Edit
           </Link>
 
-          {String(listing.status) !== "archived" ? (
+          {String(listing.status) !== "withdrawn" ? (
             <form action={archiveListingAction.bind(null, listing.id)}>
               <button
                 type="submit"

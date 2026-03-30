@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { Database } from "@/types/supabase";
 
-type UiStatus = "draft" | "active" | "under_offer" | "sold" | "withdrawn" | "archived";
+type UiStatus = "draft" | "active" | "under_offer" | "sold" | "withdrawn";
 type DbStatus = Database["public"]["Enums"]["listing_status"]; // adjust if your enum name differs
 
 const uiToDbStatus: Record<UiStatus, DbStatus> = {
@@ -13,7 +13,7 @@ const uiToDbStatus: Record<UiStatus, DbStatus> = {
   under_offer: "under_offer",
   sold: "sold",
   withdrawn: "withdrawn",
-  archived: "withdrawn", // mapping decision
+ 
 };
 
 export async function POST(request: Request) {

@@ -113,7 +113,7 @@ export default async function AdminListingEditPage({
               <option value="active">active</option>
               <option value="under_offer">under_offer</option>
               <option value="sold">sold</option>
-              <option value="archived">archived</option>
+              <option value="withdrawn">archived</option>
             </select>
           </label>
 
