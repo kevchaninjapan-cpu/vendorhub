@@ -1,39 +1,46 @@
 // lib/supabaseServer.ts
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import "server-only";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import type { Database } from "@/types/supabase";
 
 /**
- * Next.js 15: cookies() is async, so this helper must be async.
- * Always `await supabaseServer()` where you use it (route handlers, server components, server actions).
+ * Returns a Supabase server client configured for Next.js App Router.
+ * Works in Route Handlers + Server Actions + Server Components.
+ *
+ * IMPORTANT: returns the client directly — do NOT destructure.
  */
 export async function supabaseServer() {
-  const cookieStore = await cookies() // <-- await is required on Next.js 15
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        // Read all cookies for Supabase to parse session
-        getAll() {
-          return cookieStore.getAll()
-        },
-        /**
-         * Supabase will try to write/refresh auth cookies.
-         * In Route Handlers this works. In Server Components,
-         * writes may no-op (middleware can persist them if you wire it later).
-         */
-        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch {
-            // Called from a non-mutable context (e.g., some Server Components):
-            // It's safe to ignore; auth middleware can refresh tokens if needed.
-          }
-        },
+  // Fail fast: prevents "Cannot read properties of undefined (reading 'auth')"
+  if (!url || !anonKey) {
+    throw new Error(
+      "Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    );
+  }
+
+  const cookieStore = await cookies();
+
+  return createServerClient<Database>(url, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
       },
-    }
-  )
+      setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // Some server contexts can't set cookies; safe to ignore.
+        }
+      },
+    },
+  });
 }
+
+// Optional: allow default import too (prevents import-style mismatch bugs)
+export default supabaseServer;
+``

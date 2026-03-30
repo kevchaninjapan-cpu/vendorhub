@@ -22,16 +22,18 @@ function canTransition(from: string, to: string) {
 export default async function AdminListingDetailPage({
   params,
 }: {
-  params: { id: string };
+  // ✅ Next 15/16 dynamic API: params is async and must be awaited
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  // ✅ unwrap params before reading id
+  const { id } = await params;
 
   const supabase = await createServerClient();
 
   // Auth is gated by app/admin/layout.tsx, but keeping this here is safe
   const { data: authData, error: authErr } = await supabase.auth.getUser();
   if (authErr) console.error("[ADMIN_LISTING_DETAIL_AUTH_ERROR]", authErr);
-  if (!authData?.user) redirect("/login");
+  if (!authData?.user) redirect("/auth/login");
 
   const { data: listing, error } = await supabase
     .from("listings")
@@ -77,7 +79,7 @@ export default async function AdminListingDetailPage({
 
     const supabase = await createServerClient();
     const { data: u } = await supabase.auth.getUser();
-    if (!u?.user) redirect("/login");
+    if (!u?.user) redirect("/auth/login");
 
     const { data: current, error } = await supabase
       .from("listings")
@@ -113,7 +115,7 @@ export default async function AdminListingDetailPage({
 
     const supabase = await createServerClient();
     const { data: u } = await supabase.auth.getUser();
-    if (!u?.user) redirect("/login");
+    if (!u?.user) redirect("/auth/login");
 
     const { data: current, error } = await supabase
       .from("listings")
@@ -149,7 +151,7 @@ export default async function AdminListingDetailPage({
 
     const supabase = await createServerClient();
     const { data: u } = await supabase.auth.getUser();
-    if (!u?.user) redirect("/login");
+    if (!u?.user) redirect("/auth/login");
 
     const { data: current, error } = await supabase
       .from("listings")

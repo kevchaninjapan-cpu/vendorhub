@@ -1,9 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import type { Database } from "@/types/supabase";
+import { createServerClient } from "@/lib/supabase/server";
 
 // Utility: fallback slugify if RPC fails
 function fallbackSlugify(input: string) {
@@ -15,13 +14,7 @@ function fallbackSlugify(input: string) {
 }
 
 export async function createListingAction(formData: FormData) {
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get: (name) => cookieStore.get(name)?.value } }
-  );
+  const supabase = await createServerClient();
 
   // 1) Auth (required for owner_id + RLS)
   const {
@@ -30,14 +23,12 @@ export async function createListingAction(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (userErr || !user) {
-    redirect("/login");
+    redirect("/auth/login");
   }
 
-  // 2) Extract & sanitize inputs (names must match the form)
+  // 2) Extract & sanitize inputs
   const title = (formData.get("title") as string)?.trim();
-  if (!title) {
-    throw new Error("Title is required");
-  }
+  if (!title) throw new Error("Title is required");
 
   const address_line1 = (formData.get("address_line1") as string)?.trim() || null;
   const address_line2 = (formData.get("address_line2") as string)?.trim() || null;
@@ -52,7 +43,7 @@ export async function createListingAction(formData: FormData) {
     typeof v === "string" && v.length ? Number(v.replace(/[, ]/g, "")) : null;
 
   const price = toNum(formData.get("price"));
-  const price_numeric = toNum(formData.get("price_numeric")) ?? price; // convenience
+  const price_numeric = toNum(formData.get("price_numeric")) ?? price;
   const floor_area_m2 = toNum(formData.get("floor_area_m2"));
   const land_area_m2 = toNum(formData.get("land_area_m2"));
   const year_built = toNum(formData.get("year_built"));
@@ -60,23 +51,25 @@ export async function createListingAction(formData: FormData) {
   const bathrooms = toNum(formData.get("bathrooms"));
   const car_spaces = toNum(formData.get("car_spaces"));
 
-  // enums
+  // enums (typed)
   const property_type = (formData.get("property_type") ||
     "house") as Database["public"]["Enums"]["property_type"];
+
   const status = (formData.get("status") ||
     "draft") as Database["public"]["Enums"]["listing_status"];
 
-  // display price (optional pretty string)
+  // display price (optional)
   const price_display =
     (formData.get("price_display") as string)?.trim() ||
     (price ? `$${price.toLocaleString()}` : null);
 
-  // 3) Compute slug using your Supabase RPC, with a fallback
+  // 3) Compute slug using RPC with fallback
   let slug: string | null = null;
   try {
     const { data: slugData, error: slugErr } = await supabase.rpc("slugify", {
       input: title,
     });
+
     if (slugErr) {
       console.warn("slugify RPC failed, falling back:", slugErr.message);
       slug = fallbackSlugify(title);
@@ -87,13 +80,13 @@ export async function createListingAction(formData: FormData) {
     slug = fallbackSlugify(title);
   }
 
-  // 4) Insert row (type‑safe to your generated types)
+  // 4) Insert row
   const { data, error } = await supabase
     .from("listings")
     .insert({
       title,
       slug,
-      owner_id: user.id, // <-- critical for RLS
+      owner_id: user.id,
       address_line1,
       address_line2,
       suburb,
@@ -112,16 +105,12 @@ export async function createListingAction(formData: FormData) {
       car_spaces,
       property_type,
       status,
-      // created_at/updated_at likely default via DB; omit unless you set explicitly
     } satisfies Database["public"]["Tables"]["listings"]["Insert"])
     .select("id")
     .single();
 
-  if (error) {
-    // Optionally, return an object and render a message in the form
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
-  // 5) Redirect to edit page for the new listing
+  // 5) Redirect
   redirect(`/admin/listings/${data.id}`);
 }

@@ -7,7 +7,7 @@ export async function archiveListingAction(listingId: string) {
   const supabase = await createServerClient();
 
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth?.user) redirect("/login");
+  if (!auth?.user) redirect("/auth/login");
 
   const { error } = await supabase
     .from("listings")
