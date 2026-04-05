@@ -1,7 +1,6 @@
-// app/admin/listings/[id]/ImageGallery.tsx
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import { requireAdminAuth } from '@/lib/guards'
+import { requireAdminAuth } from "@/lib/guards";
 import ImageGalleryClient from "./ImageGalleryClient";
 
 const BUCKET = "listing-photos";
@@ -16,10 +15,15 @@ type ImageRow = {
   created_at: string | null;
 };
 
-export default async function ImageGallery({ listingId }: { listingId: string }) {
-await requireAdminAuth()
+export default async function ImageGallery({
+  listingId,
+}: {
+  listingId: string;
+}) {
+  await requireAdminAuth();
 
   const cookieStore = await cookies();
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -33,9 +37,12 @@ await requireAdminAuth()
 
   const { data, error } = await supabase
     .from("listing_images")
-    .select("id, listing_id, storage_path, alt, sort_order, is_cover, created_at")
+    .select(
+      "id, listing_id, storage_path, alt, sort_order, is_cover, created_at"
+    )
     .eq("listing_id", listingId)
-    .order("sort_order", { ascending: true, nullsFirst: false })
+    .order("is_cover", { ascending: false })                 // ✅ cover first
+    .order("sort_order", { ascending: true, nullsFirst: true }) // ✅ correct ordering
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -47,18 +54,20 @@ await requireAdminAuth()
     );
   }
 
-  const images = ((data ?? []) as ImageRow[]).map((img) => {
-    const url =
-      img.storage_path
-        ? supabase.storage.from(BUCKET).getPublicUrl(img.storage_path).data.publicUrl
-        : null;
+  const images = (data ?? []).map((img: ImageRow) => {
+    const publicUrl = img.storage_path
+      ? supabase.storage
+          .from(BUCKET)
+          .getPublicUrl(img.storage_path).data.publicUrl
+      : null;
 
     return {
       ...img,
-      publicUrl: url,
+      publicUrl,
     };
   });
 
-  return <ImageGalleryClient listingId={listingId} images={images} />;
+  return (
+    <ImageGalleryClient listingId={listingId} images={images} />
+  );
 }
-``

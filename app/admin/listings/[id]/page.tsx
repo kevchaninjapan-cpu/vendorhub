@@ -1,8 +1,12 @@
 // app/admin/listings/[id]/page.tsx
+// app/admin/listings/[id]/page.tsx
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminTopBar } from "@/app/admin/_components/AdminTopBar";
 import { archiveListingAction, restoreListingToDraftAction } from "./actions";
+
+import AdminImageGallery from "./AdminImageGallery";
+import ImageUploader from "./ImageUploader";
 
 export const dynamic = "force-dynamic";
 
