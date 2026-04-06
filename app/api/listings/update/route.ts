@@ -1,72 +1,83 @@
 // app/api/listings/update/route.ts
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import type { Database } from "@/types/supabase";
+import { supabaseServer } from "@/lib/supabaseServer";
 
-type UiStatus = "draft" | "active" | "under_offer" | "sold" | "withdrawn";
-type DbStatus = Database["public"]["Enums"]["listing_status"]; // adjust if your enum name differs
+const DRAFT_STATUS = "draft"; // change if needed
 
-const uiToDbStatus: Record<UiStatus, DbStatus> = {
-  draft: "draft",
-  active: "active",
-  under_offer: "under_offer",
-  sold: "sold",
-  withdrawn: "withdrawn",
- 
-};
+// ✅ Only allow these fields to be updated from the wizard
+const ALLOWED_PATCH_FIELDS = new Set([
+  "title",
+  "description",
+  "price_numeric",
+  "price_display",
+  "property_type",
+  "bedrooms",
+  "bathrooms",
+  "car_spaces",
+  "floor_area_m2",
+  "land_area_m2",
+  "year_built",
+  "address_line1",
+  "address_line2",
+  "suburb",
+  "city",
+  "region",
+  "postcode",
+  "latitude",
+  "longitude",
+  "slug",
+  "expires_at",
+]);
 
-export async function POST(request: Request) {
+export async function PATCH(request: Request) {
   try {
-    const body = (await request.json()) as
-      Partial<Database["public"]["Tables"]["listings"]["Update"]> & {
-        id?: string;
-        status?: UiStatus | null;
-      };
+    const supabase = await supabaseServer();
 
-    if (!body?.id || typeof body.id !== "string") {
-      return NextResponse.json({ error: "Missing listing ID" }, { status: 400 });
+    const { data: userRes, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userRes.user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const cookieStore = await cookies(); // Next 15/16: async in route handlers
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options?: CookieOptions) {
-            cookieStore.set(name, value, options);
-          },
-          remove(name: string, _options?: CookieOptions) {
-            cookieStore.delete(name);
-          },
-        },
-      }
-    );
+    const body = await request.json();
+    const id = body?.id as string;
+    const patch = body?.patch as Record<string, unknown>;
 
-    const { id, status: uiStatus, ...rest } = body;
+    if (!id || typeof id !== "string") {
+      return Response.json({ error: "Missing id" }, { status: 400 });
+    }
+    if (!patch || typeof patch !== "object") {
+      return Response.json({ error: "Missing patch object" }, { status: 400 });
+    }
 
-    const patch: Database["public"]["Tables"]["listings"]["Update"] = {
-      ...rest,
-      ...(uiStatus !== undefined ? { status: uiToDbStatus[uiStatus] } : {}),
-    };
+    // Build safe update object
+    const update: Record<string, any> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      if (ALLOWED_PATCH_FIELDS.has(k)) update[k] = v;
+    }
 
-    const { data, error } = await supabase
+    // Always bump updated_at server-side
+    update.updated_at = new Date().toISOString();
+
+    // No valid fields? no-op
+    if (Object.keys(update).length === 1) {
+      return Response.json({ ok: true, noop: true });
+    }
+
+    // Update only drafts (prevents wizard editing published rows)
+    const { error } = await supabase
       .from("listings")
-      .update(patch)
+      .update(update)
       .eq("id", id)
-      .select()
-      .single();
+      .eq("status", DRAFT_STATUS as any);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return Response.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    return Response.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Invalid JSON" }, { status: 400 });
+    return Response.json(
+      { error: e?.message ?? "Server error" },
+      { status: 500 }
+    );
   }
 }

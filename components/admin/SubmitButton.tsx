@@ -1,25 +1,44 @@
-'use client'
+// components/admin/SubmitButton.tsx
+"use client";
 
-import { useFormStatus } from 'react-dom'
+import * as React from "react";
+import { useFormStatus } from "react-dom";
+import { Button, type ButtonVariant, type ButtonSize } from "@/components/ui";
 
-export function SubmitButton({
+type SubmitButtonProps = Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "type" | "disabled"
+> & {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  pendingText?: string;
+};
+
+/**
+ * Thin wrapper around UI kit Button for server actions/forms.
+ * - Disables while pending
+ * - Keeps styling consistent across admin screens
+ */
+export default function SubmitButton({
   children,
+  variant = "primary",
+  size = "md",
+  pendingText = "Working…",
   className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
-  const { pending } = useFormStatus()
+  ...props
+}: SubmitButtonProps) {
+  const { pending } = useFormStatus();
+
   return (
-    <button
+    <Button
       type="submit"
+      variant={variant}
+      size={size}
+      className={className}
       disabled={pending}
-      className={
-        className ??
-        'rounded bg-black px-3 py-2 text-sm font-medium text-white disabled:opacity-50'
-      }
+      {...props}
     >
-      {pending ? 'Working…' : children}
-    </button>
-  )
+      {pending ? pendingText : children}
+    </Button>
+  );
 }

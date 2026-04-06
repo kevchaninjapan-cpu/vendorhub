@@ -1,5 +1,6 @@
 // app/(site)/layout.tsx
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function SiteLayout({
   children,
@@ -7,48 +8,88 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      {/* Top nav for public pages */}
-      <header className="border-b">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <Link href="/" className="font-semibold">
-            VendorHub
-          </Link>
+    <div className="min-h-screen bg-[#f9f9fb] text-slate-900">
+      {/* ===================== */}
+      {/* TOP NAV */}
+      {/* ===================== */}
+      <header className="relative z-10">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex h-16 items-center justify-between">
+            {/* Left */}
+            <div className="flex items-center gap-10">
+              <Link
+                href="/"
+                className="text-sm font-semibold tracking-tight"
+              >
+                VendorHub
+              </Link>
 
-          <nav className="flex items-center gap-6 text-sm text-slate-600">
-            <Link href="/pricing" className="hover:text-slate-900">
-              Pricing
-            </Link>
-            <Link href="/faq" className="hover:text-slate-900">
-              FAQ
-            </Link>
-            <Link
-              href="/auth/sign-in"
-              className="border-0 outline-none ring-0 focus:outline-none focus:ring-0"
-            >
-              Sign in
-            </Link>
-          </nav>
+              <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
+                <Link
+                  href="/solutions"
+                  className="hover:text-slate-900 transition-colors"
+                >
+                  Solutions
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="hover:text-slate-900 transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/resources"
+                  className="hover:text-slate-900 transition-colors"
+                >
+                  Resources
+                </Link>
+              </nav>
+            </div>
+
+            {/* Right */}
+            <div className="flex items-center gap-4">
+              <Link
+                href="/consult"
+                className="hidden sm:inline-block text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Book a consult
+              </Link>
+
+              <Link href="/listings/create">
+                <Button size="sm">Start listing</Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        {children}
-      </main>
+      {/* ===================== */}
+      {/* PAGE CONTENT */}
+      {/* ===================== */}
+      {children}
 
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 text-sm text-slate-600">
-          <span>© {new Date().getFullYear()} VendorHub</span>
-          <div className="flex items-center gap-4">
-            <Link href="/legal/terms" className="hover:text-slate-900">
-              Terms
-            </Link>
-            <Link href="/legal/privacy" className="hover:text-slate-900">
-              Privacy
-            </Link>
+      {/* ===================== */}
+      {/* FOOTER (quiet, optional) */}
+      {/* ===================== */}
+      <footer className="mt-32 border-t border-slate-200/60">
+        <div className="mx-auto max-w-7xl px-6 py-12 text-sm text-slate-500">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>© {new Date().getFullYear()} VendorHub</div>
+
+            <div className="flex gap-6">
+              <Link href="/privacy" className="hover:text-slate-700">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-slate-700">
+                Terms
+              </Link>
+              <Link href="/contact" className="hover:text-slate-700">
+                Contact
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

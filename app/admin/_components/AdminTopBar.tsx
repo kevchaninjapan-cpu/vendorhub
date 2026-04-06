@@ -29,32 +29,50 @@ export function AdminTopBar({
   }
 
   return (
-    <div className="mb-6 flex items-center justify-between border-b pb-3">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-sm text-slate-600">
-        {crumbs.map((c, i) => (
-          <span key={i} className="flex items-center gap-2">
-            {c.href ? (
-              <Link href={c.href} className="hover:text-slate-900">
-                {c.label}
-              </Link>
-            ) : (
-              <span className="font-medium text-slate-900">{c.label}</span>
-            )}
-            {i < crumbs.length - 1 && <span>/</span>}
-          </span>
-        ))}
-      </nav>
+    <div className="mb-6">
+      <div className="rounded-2xl border border-border/40 bg-surface shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" className="min-w-0">
+            <ol className="flex flex-wrap items-center gap-2 text-sm">
+              {crumbs.map((c, i) => {
+                const isLast = i === crumbs.length - 1;
 
-      {/* Logout */}
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="text-sm text-slate-600 hover:text-slate-900"
-        >
-          Log out
-        </button>
-      </form>
+                return (
+                  <li key={`${c.label}-${i}`} className="flex min-w-0 items-center gap-2">
+                    {c.href && !isLast ? (
+                      <Link
+                        href={c.href}
+                        className="truncate text-muted hover:text-foreground"
+                      >
+                        {c.label}
+                      </Link>
+                    ) : (
+                      <span className="truncate font-medium text-foreground">
+                        {c.label}
+                      </span>
+                    )}
+
+                    {!isLast && (
+                      <span className="select-none text-muted">/</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+
+          {/* Logout */}
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="text-sm text-muted hover:text-foreground"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

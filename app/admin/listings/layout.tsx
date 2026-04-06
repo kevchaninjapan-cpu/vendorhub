@@ -1,8 +1,15 @@
-// app/admin/listings/layout.tsx
-export default function ListingsLayout({
+// app/layout.tsx
+import type { ReactNode } from "react";
+import "./globals.css";
+
+export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode;
 }) {
-  return <>{children}</>
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
 }
