@@ -1,12 +1,12 @@
-// app/api/admin/listings/[id]/restore/route.ts
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await supabaseServer();
 
     const { data: userRes, error: userErr } = await supabase.auth.getUser();
@@ -18,21 +18,13 @@ export async function POST(
 
     const { error } = await supabase
       .from("listings")
-      .update({
-        deleted_at: null,
-        updated_at: now,
-      })
-      .eq("id", params.id);
+      .update({ deleted_at: null, updated_at: now })
+      .eq("id", id);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-    return NextResponse.json({ ok: true, id: params.id });
+    return NextResponse.json({ ok: true, id });
   } catch (e: any) {
-    return NextResponse.json(
-      { error: e?.message ?? "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: e?.message ?? "Server error" }, { status: 500 });
   }
 }

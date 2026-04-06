@@ -4,9 +4,11 @@ import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const supabase = await supabaseServer();
 
     const { data: userRes, error: userErr } = await supabase.auth.getUser();
@@ -14,12 +16,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const listingId = params.id;
-
     const { data, error } = await supabase
       .from("listing_images")
       .select("id, listing_id, url, sort_order, is_cover, created_at")
-      .eq("listing_id", listingId)
+      .eq("listing_id", id)
       .order("is_cover", { ascending: false })
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
@@ -36,4 +36,3 @@ export async function GET(
     );
   }
 }
-``
