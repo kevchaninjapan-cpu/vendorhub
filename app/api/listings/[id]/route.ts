@@ -1,23 +1,22 @@
-// app/api/admin/listings/[id]/route.ts
+// app/api/listings/[id]/route.ts
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const supabase = await supabaseServer();
 
-    const { data: userRes, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userRes.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    // If your RLS allows public read of active listings, this works without auth.
+    // If it doesn’t, you can add an auth check here.
     const { data, error } = await supabase
       .from("listings")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
 
     if (error) {
