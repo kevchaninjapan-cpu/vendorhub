@@ -1,12 +1,15 @@
 // app/layout.tsx
+import "./globals.css";
+import type { ReactNode } from "react";
 
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-screen bg-white text-slate-900">
-        {children}
-      </body>
+    <html lang="en">
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
