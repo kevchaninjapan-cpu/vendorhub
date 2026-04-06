@@ -1,120 +1,106 @@
+// app/admin/listings/[id]/AdminImageGallery.tsx
 "use client";
 
-import {
-  DndContext,
-  closestCenter,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import * as React from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
-type Image = {
+type ListingImage = {
   id: string;
-  publicUrl: string;
+  listing_id: string;
+  url: string;
+  sort_order: number | null;
   is_cover: boolean | null;
+  created_at: string | null;
 };
 
-function SortableImage({
-  image,
-  onSetCover,
-}: {
-  image: Image;
-  onSetCover: (id: string) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: image.id });
+export default function AdminImageGallery({ listingId }: { listingId: string }) {
+  const [images, setImages] = React.useState<ListingImage[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const load = React.useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/admin/listings/${listingId}/images`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+      });
+
+    const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error ?? "Failed to load images");
+      }
+
+      setImages((json?.images ?? []) as ListingImage[]);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to load images");
+    } finally {
+      setLoading(false);
+    }
+  }, [listingId]);
+
+  React.useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (loading) return <div className="text-sm text-muted">Loading images…</div>;
+
+  if (error) {
+    return (
+      <div className="space-y-3">
+        <div className="text-sm text-red-600">{error}</div>
+        <Button variant="outline" size="sm" onClick={load}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (!images.length) {
+    return <div className="text-sm text-muted">No images yet.</div>;
+  }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`relative rounded-xl border ${
-        image.is_cover ? "ring-2 ring-black" : ""
-      }`}
-      {...attributes}
-      {...listeners}
-    >
-      <img
-        src={image.publicUrl}
-        className="aspect-video w-full rounded-xl object-cover"
-      />
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {images.map((img) => (
+          <div
+            key={img.id}
+            className="overflow-hidden rounded-xl border border-border/40 bg-background"
+          >
+            <div className="relative aspect-[4/3]">
+              <Image
+                src={img.url}
+                alt="Listing image"
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 33vw"
+              />
+            </div>
 
-      {!image.is_cover && (
-        <button
-          onClick={() => onSetCover(image.id)}
-          className="absolute bottom-2 right-2 rounded bg-black px-2 py-1 text-xs text-white"
-        >
-          Set cover
-        </button>
-      )}
+            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs">
+              <span className="text-muted truncate">
+                {img.is_cover ? "Cover" : ""}
+              </span>
 
-      {image.is_cover && (
-        <div className="absolute top-2 left-2 rounded bg-black px-2 py-1 text-xs text-white">
-          Cover
-        </div>
-      )}
+              {/* Placeholder action – wire later */}
+              <Button variant="outline" size="sm" className="h-7 px-2">
+                Set cover
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Button variant="outline" size="sm" onClick={load}>
+        Refresh
+      </Button>
     </div>
   );
 }
-
-export default function AdminImageGallery({
-  listingId,
-  images,
-}: {
-  listingId: string;
-  images: Image[];
-}) {
-  async function persistOrder(order: string[]) {
-    await fetch(`/api/admin/listings/${listingId}/images`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order }),
-    });
-  }
-
-  async function setCover(id: string) {
-    await fetch(`/api/admin/listings/${listingId}/images`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ coverImageId: id }),
-    });
-
-    location.reload();
-  }
-
-  function onDragEnd(e: DragEndEvent) {
-    const { active, over } = e;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = images.findIndex(i => i.id === active.id);
-    const newIndex = images.findIndex(i => i.id === over.id);
-
-    const reordered = arrayMove(images, oldIndex, newIndex);
-    persistOrder(reordered.map(i => i.id));
-  }
-
-  return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={images.map(i => i.id)}>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {images.map(img => (
-            <SortableImage
-              key={img.id}
-              image={img}
-              onSetCover={setCover}
-            />
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
-  );
-}
+``

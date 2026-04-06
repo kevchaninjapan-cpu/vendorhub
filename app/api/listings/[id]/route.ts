@@ -1,58 +1,35 @@
-// app/api/listings/[id]/route.ts
+// app/api/admin/listings/[id]/route.ts
 import { NextResponse } from "next/server";
-import { requireAuth } from '@/lib/guards'
-import { getListingById, softDeleteListing, updateListing } from "@/lib/db/listings";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function GET(
-  _req: Request,
-  ctx: { params: { id: string } | Promise<{ id: string }> }
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
-  await requireAuth();
+  try {
+    const supabase = await supabaseServer();
 
-  const { id } = await Promise.resolve(ctx.params);
-  const listing = await getListingById(id);
+    const { data: userRes, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userRes.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  return NextResponse.json({ listing });
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .eq("id", params.id)
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ listing: data });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? "Server error" },
+      { status: 500 }
+    );
+  }
 }
-
-export async function PATCH(
-  req: Request,
-  ctx: { params: { id: string } | Promise<{ id: string }> }
-) {
-await requireAuth()
-
-  const { id } = await Promise.resolve(ctx.params);
-  const body = await req.json();
-
-  const updated = await updateListing(id, {
-    title: body?.title ?? undefined,
-    description: body?.description ?? undefined,
-    status: body?.status ?? undefined,
-    price_numeric: body?.price_numeric ?? undefined,
-    price_display: body?.price_display ?? undefined,
-    address_line1: body?.address_line1 ?? undefined,
-    suburb: body?.suburb ?? undefined,
-    city: body?.city ?? undefined,
-    region: body?.region ?? undefined,
-    postcode: body?.postcode ?? undefined,
-    slug: body?.slug ?? undefined,
-    published_at: body?.published_at ?? undefined,
-  });
-
-  return NextResponse.json({ listing: updated });
-}
-
-export async function DELETE(
-  _req: Request,
-  ctx: { params: { id: string } | Promise<{ id: string }> }
-) {
-await requireAuth()
-
-  const { id } = await Promise.resolve(ctx.params);
-  const deleted = await softDeleteListing(id);
-
-  return NextResponse.json({ listing: deleted });
-}
+``

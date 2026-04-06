@@ -1,49 +1,38 @@
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@/lib/supabase/route'
-import { isAdminUser } from '@/lib/auth/admin'
-
-export const dynamic = 'force-dynamic'
+// app/api/admin/listings/[id]/restore/route.ts
+import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
-  const supabase = await createRouteHandlerClient()
+  try {
+    const supabase = await supabaseServer();
 
-  const { data, error: authErr } = await supabase.auth.getUser()
-  if (authErr) console.error('[API_RESTORE_AUTH_ERROR]', authErr)
+    const { data: userRes, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userRes.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const user = data?.user
-  if (!user || !isAdminUser(user)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const now = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("listings")
+      .update({
+        deleted_at: null,
+        updated_at: now,
+      })
+      .eq("id", params.id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ ok: true, id: params.id });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? "Server error" },
+      { status: 500 }
+    );
   }
-
-  const { data: listing, error: readErr } = await supabase
-    .from('listings')
-    .select('id, status')
-    .eq('id', id)
-    .maybeSingle()
-
-  if (readErr) {
-    console.error('[API_RESTORE_READ_ERROR]', readErr)
-    return NextResponse.json({ error: 'Unable to read listing' }, { status: 500 })
-  }
-  if (!listing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-
-  if (listing.status !== 'archived') {
-    return NextResponse.json({ error: 'Only archived listings can be restored' }, { status: 400 })
-  }
-
-  const { error: updErr } = await supabase
-    .from('listings')
-    .update({ status: 'draft' })
-    .eq('id', id)
-
-  if (updErr) {
-    console.error('[API_RESTORE_UPDATE_ERROR]', updErr)
-    return NextResponse.json({ error: 'Unable to restore listing' }, { status: 500 })
-  }
-
-  return NextResponse.json({ ok: true })
 }

@@ -9,7 +9,6 @@ export async function GET(
   try {
     const supabase = await supabaseServer();
 
-    // Require auth for admin route (RLS may already block, but this gives a clean 401)
     const { data: userRes, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userRes.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,11 +16,6 @@ export async function GET(
 
     const listingId = params.id;
 
-    // Fetch images for this listing.
-    // Assumes you have a table like `listing_images` with these columns:
-    // id, listing_id, url, sort_order, is_cover, created_at
-    //
-    // If your column names differ, adjust the select/order lines.
     const { data, error } = await supabase
       .from("listing_images")
       .select("id, listing_id, url, sort_order, is_cover, created_at")
@@ -31,7 +25,6 @@ export async function GET(
       .order("created_at", { ascending: true });
 
     if (error) {
-      // If RLS blocks access, Supabase often returns a 401/403-like error message.
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

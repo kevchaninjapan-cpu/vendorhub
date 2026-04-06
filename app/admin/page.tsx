@@ -1,69 +1,37 @@
-import { createClient } from "@/lib/supabase/server";
+// app/admin/page.tsx
 import Link from "next/link";
 
-type SearchParams = {
-  page?: string | string[];
-};
+type SearchParams = Record<string, string | string[] | undefined>;
 
-export default async function AdminListingsPage({
+export default function AdminHomePage({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams>;
+  searchParams?: SearchParams;
 }) {
-  // ✅ FIX: unwrap searchParams
-  const params = await searchParams;
-
-  const rawPage = Array.isArray(params.page)
-    ? params.page[0]
-    : params.page;
-
-  const page = Math.max(parseInt(rawPage ?? "1", 10), 1);
-  const pageSize = 10;
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  const supabase = await createClient();
-
-  const { data: listings, error } = await supabase
-    .from("listings")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Listings</h1>
+    <main className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-5xl px-6 py-12">
+        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
+        <p className="mt-2 text-sm text-muted">
+          Internal tools for managing listings and content.
+        </p>
 
-      <table className="w-full border">
-        <thead>
-          <tr className="border-b">
-            <th className="p-2 text-left">Title</th>
-            <th className="p-2 text-left">Status</th>
-            <th className="p-2 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {listings?.map((listing) => (
-            <tr key={listing.id} className="border-b">
-              <td className="p-2">{listing.title}</td>
-              <td className="p-2">{listing.status}</td>
-              <td className="p-2">
-                {/* ✅ SEE ISSUE #2 BELOW */}
-                <Link
-                  href={`/admin/listings/${listing.id}`}
-                  className="text-blue-600 hover:underline"
-                >
-                  View
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        <div className="mt-8 flex gap-4">
+          <Link
+            href="/admin/listings"
+            className="rounded-xl border border-border/60 bg-surface px-4 py-2 text-sm hover:bg-surface-2"
+          >
+            Manage listings
+          </Link>
+
+          <Link
+            href="/listings"
+            className="rounded-xl border border-border/60 bg-background px-4 py-2 text-sm hover:bg-surface"
+          >
+            View public listings
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
