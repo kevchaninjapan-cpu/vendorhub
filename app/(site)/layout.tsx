@@ -1,6 +1,7 @@
 // app/(site)/layout.tsx
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import "./globals.css";
 
 export default function SiteLayout({
   children,
