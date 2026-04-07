@@ -1,5 +1,5 @@
 // app/dashboard/page.tsx
-import { requireAuth } from '@/lib/guards'
+import { requireAuth } from "@/lib/guards"
 // (Optionally) import getProfile if you gate admin content
 // import { getProfile } from "@/lib/auth";
 

@@ -2,7 +2,7 @@
 import "server-only";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { requireAuth } from '@/lib/guards'
+import { requireAuth } from "@/lib/guards"
 
 export const dynamic = "force-dynamic";
 

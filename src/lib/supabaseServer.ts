@@ -1,20 +1,17 @@
-// lib/supabaseServer.ts
+// src/lib/supabaseServer.ts
 import "server-only";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 
 /**
- * Returns a Supabase server client configured for Next.js App Router.
+ * Server-side Supabase client for Next.js App Router.
  * Works in Route Handlers + Server Actions + Server Components.
- *
- * IMPORTANT: returns the client directly — do NOT destructure.
  */
 export async function supabaseServer() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Fail fast: prevents "Cannot read properties of undefined (reading 'auth')"
   if (!url || !anonKey) {
     throw new Error(
       "Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY"
@@ -41,6 +38,6 @@ export async function supabaseServer() {
   });
 }
 
-// Optional: allow default import too (prevents import-style mismatch bugs)
+// Default export to avoid import-style mismatch across the codebase
 export default supabaseServer;
 ``

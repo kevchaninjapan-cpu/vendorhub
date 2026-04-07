@@ -1,15 +1,19 @@
-import { createAdminClient } from "@/lib/supabase/admin"
-import Link from "next/link"
+import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export default async function AdminListingsPage() {
-  const supabase = createAdminClient()
+  const supabase = createAdminClient();
 
-  const { data: listings } = await supabase
+  const { data: listings, error } = await supabase
     .from("listings")
     .select("id, title, status, created_at")
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return (
     <div className="p-6 space-y-4">
@@ -19,10 +23,11 @@ export default async function AdminListingsPage() {
         <thead className="bg-slate-50">
           <tr>
             <th className="p-2 text-left">Title</th>
-            <th className="p-2">Status</th>
-            <th className="p-2"></th>
+            <th className="p-2 text-center">Status</th>
+            <th className="p-2 text-right"></th>
           </tr>
         </thead>
+
         <tbody>
           {listings?.map((l) => (
             <tr key={l.id} className="border-t">
@@ -38,8 +43,16 @@ export default async function AdminListingsPage() {
               </td>
             </tr>
           ))}
+
+          {!listings?.length && (
+            <tr>
+              <td colSpan={3} className="p-4 text-center text-slate-500">
+                No listings found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
-  )
+  );
 }

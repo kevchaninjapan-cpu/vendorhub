@@ -1,5 +1,5 @@
 import 'server-only'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient } from "@/lib/supabase/server"
 import type { User } from '@supabase/supabase-js'
 
 /**

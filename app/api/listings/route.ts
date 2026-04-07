@@ -1,7 +1,7 @@
 // app/api/listings/route.ts
 import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/guards'
-import { createListing, getAllListings } from '@/lib/db/listings'
+import { requireAuth } from "@/lib/guards"
+import { createListing, getAllListings } from "@/lib/db/listings"
 
 export const runtime = 'nodejs'
 

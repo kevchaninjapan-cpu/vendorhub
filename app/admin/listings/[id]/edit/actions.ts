@@ -1,4 +1,4 @@
-// app/admin/listings/[id]/edit/actions.ts
+// src/app/admin/listings/[id]/edit/actions.ts
 "use server";
 
 import { redirect } from "next/navigation";
@@ -17,29 +17,32 @@ export async function updateListingAction(id: string, formData: FormData) {
 
   const supabase = createAdminClient();
 
-  // Keep it simple: update a handful of common fields.
   const title = cleanStr(formData.get("title"));
   const suburb = cleanStr(formData.get("suburb"));
   const city = cleanStr(formData.get("city"));
   const price_display = cleanStr(formData.get("price_display"));
-
   const status = cleanStr(formData.get("status"));
   const property_type = cleanStr(formData.get("property_type"));
 
   const patch: Record<string, any> = {
-    ...(title !== null ? { title } : {}),
-    ...(suburb !== null ? { suburb } : {}),
-    ...(city !== null ? { city } : {}),
-    ...(price_display !== null ? { price_display } : {}),
-    ...(status !== null ? { status } : {}),
-    ...(property_type !== null ? { property_type } : {}),
+    ...(title && { title }),
+    ...(suburb && { suburb }),
+    ...(city && { city }),
+    ...(price_display && { price_display }),
+    ...(status && { status }),
+    ...(property_type && { property_type }),
   };
 
-  const { error } = await supabase.from("listings").update(patch).eq("id", id);
-
-  if (error) {
-    throw new Error(error.message);
+  if (!Object.keys(patch).length) {
+    redirect(`/admin/listings/${id}`);
   }
+
+  const { error } = await supabase
+    .from("listings")
+    .update(patch)
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
 
   revalidatePath("/admin/listings");
   revalidatePath(`/admin/listings/${id}`);
@@ -47,3 +50,4 @@ export async function updateListingAction(id: string, formData: FormData) {
 
   redirect(`/admin/listings/${id}`);
 }
+``

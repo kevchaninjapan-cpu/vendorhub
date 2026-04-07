@@ -1,4 +1,4 @@
-// app/admin/listings/[id]/actions.ts
+// src/app/admin/listings/[id]/actions.ts
 "use server";
 
 import { redirect } from "next/navigation";
@@ -7,10 +7,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdminAuth } from "@/lib/guards";
 
 /**
- * Archive a listing (sets status to 'archived')
+ * Archive a listing (sets status to 'withdrawn')
  */
 export async function archiveListingAction(id: string) {
-  // Ensure caller is authenticated as admin (your guard handles redirect)
+  // Ensure caller is authenticated as admin
   await requireAdminAuth();
 
   const supabase = createAdminClient();
@@ -33,7 +33,7 @@ export async function archiveListingAction(id: string) {
 }
 
 /**
- * Restore a listing (sets status to 'draft')
+ * Restore a listing (sets status back to 'draft')
  */
 export async function restoreListingToDraftAction(id: string) {
   await requireAdminAuth();

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@/lib/supabase/route'
-import { isAdminUser } from '@/lib/auth/admin'
+import { createRouteHandlerClient } from "@/lib/supabase/route"
+import { isAdminUser } from "@/lib/auth/admin"
 
 export const dynamic = 'force-dynamic'
 

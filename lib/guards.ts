@@ -1,5 +1,5 @@
 import 'server-only'
-import { requireUser, requireAdmin } from '@/lib/auth'
+import { requireUser, requireAdmin } from "@/lib/auth"
 
 export async function requireAuth() {
   return requireUser()

@@ -1,6 +1,6 @@
 // lib/db/listings.ts
 import 'server-only'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient } from "@/lib/supabase/server"
 
 /**
  * Centralised DB helpers for listings.
