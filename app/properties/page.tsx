@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
+
 type Property = {
   id: string;
   title: string;
-  address: string | null;
-  price: number | null;
-  status: "draft" | "published";
+  address: string;
+  price: number;
   created_at: string;
-  owner_id: string | null;
+  owner_id: string;
+  status: string; // ✅ FIX: was "draft" | "published"
 };
 
 export default function PropertiesPage() {

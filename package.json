@@ -15,7 +15,7 @@
     "start": "next start",
     "lint": "next lint",
 
-    "prebuild": "node -e \"const { execSync } = require('child_process'); const out = execSync(process.platform === 'win32' ? 'powershell -Command \\\"Get-ChildItem -Recurse -File | Select-String -Pattern \\\"@profile/\\\"\\\"' : 'grep -R \"@profile/\" src || true', { encoding: 'utf8' }); if (out.trim()) { console.error('\\n❌ Invalid import alias detected: @profile/. Use @/ only.\\n'); process.exit(1); }\""
+     "prebuild": "node ./scripts/prebuild-guard.mjs"
   },
 
   "dependencies": {

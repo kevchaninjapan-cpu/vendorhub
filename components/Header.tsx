@@ -35,12 +35,12 @@ export default function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2">
             <Link href="/login" className="hidden sm:inline-flex">
-              <Button variant="ghost" size="md">
+              <Button variant="ghost">
                 Log in
               </Button>
             </Link>
             <Link href="/start" className="inline-flex">
-              <Button variant="primary" size="md">
+              <Button variant="default">
                 Start listing
               </Button>
             </Link>

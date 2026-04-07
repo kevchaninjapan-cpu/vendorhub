@@ -19,16 +19,16 @@
       "@/*": ["src/*"]
     },
 
-    "ignoreDeprecations": "6.0",
-
     "incremental": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+
     "plugins": [
       {
         "name": "next"
       }
     ],
+
     "types": ["node"]
   },
 
@@ -36,7 +36,6 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "types/**/*.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

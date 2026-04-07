@@ -40,7 +40,7 @@ export async function POST(
 
   const { error: updErr } = await supabase
     .from('listings')
-    .update({ status: 'archived' })
+    .update({ status: 'withdrawn' })
     .eq('id', id)
 
   if (updErr) {

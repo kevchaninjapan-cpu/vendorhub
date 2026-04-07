@@ -1,8 +1,7 @@
-// app/sell/new/page.tsx
 "use client";
 
-import Link from "next/link";
 import * as React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 import {
   Card,
@@ -85,8 +84,6 @@ const ADD_ONS = [
 
 export default function SellNewPage() {
   const [selected, setSelected] = React.useState<Plan>("pro");
-
-  // ✅ If your “create listing” route is different, change this one line:
   const nextHref = `/listings/create?plan=${selected}`;
 
   return (
@@ -98,8 +95,7 @@ export default function SellNewPage() {
             Start selling with VendorHub
           </h1>
           <p className="mt-3 text-lg text-muted">
-            Choose a package based on how hands‑on you want to be. You can
-            upgrade anytime and add concierge services as needed.
+            Choose a package based on how hands‑on you want to be.
           </p>
         </div>
 
@@ -111,17 +107,17 @@ export default function SellNewPage() {
             return (
               <Card
                 key={p.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelected(p.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setSelected(p.id);
+                }}
                 className={cn(
                   "cursor-pointer transition",
                   active && "ring-2 ring-primary/20",
                   p.highlight && !active && "ring-1 ring-primary/10"
                 )}
-                onClick={() => setSelected(p.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") setSelected(p.id);
-                }}
               >
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
@@ -129,12 +125,12 @@ export default function SellNewPage() {
                       <CardTitle className="text-base">{p.name}</CardTitle>
                       <CardDescription>{p.tagline}</CardDescription>
                     </div>
-                    {p.badge ? <Badge variant="default">{p.badge}</Badge> : null}
+                    {p.badge && <Badge>{p.badge}</Badge>}
                   </div>
 
-                  <div className="pt-1">
+                  <div>
                     <div className="text-3xl font-bold">{p.priceOnce}</div>
-                    <div className="mt-1 text-sm text-muted">
+                    <div className="text-sm text-muted">
                       {p.priceMonthly}
                     </div>
                   </div>
@@ -144,25 +140,19 @@ export default function SellNewPage() {
                   <ul className="space-y-2 text-sm text-muted">
                     {p.features.map((f) => (
                       <li key={f} className="flex gap-2">
-                        <span className="mt-[2px] inline-block h-4 w-4 rounded-full border border-border/60 bg-surface" />
+                        <span className="mt-[2px] h-4 w-4 rounded-full border border-border/60 bg-surface" />
                         <span>{f}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
 
-                <CardFooter className="flex items-center justify-between gap-3">
-                  <span
-                    className={cn(
-                      "text-xs",
-                      active ? "text-foreground" : "text-muted"
-                    )}
-                  >
+                <CardFooter className="flex items-center justify-between">
+                  <span className={active ? "text-foreground" : "text-muted"}>
                     {active ? "Selected" : "Select"}
                   </span>
                   <Button
-                    variant={active ? "primary" : "outline"}
-                    size="sm"
+                    variant={active ? "default" : "outline"}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelected(p.id);
@@ -180,26 +170,23 @@ export default function SellNewPage() {
         <div className="mt-10">
           <Card>
             <CardHeader>
-              <CardTitle>Optional add‑ons (any package)</CardTitle>
+              <CardTitle>Optional add‑ons</CardTitle>
               <CardDescription>
-                Add professional services when you want extra help — keep
-                control, reduce admin.
+                Add professional services when you want extra help.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {ADD_ONS.map((a) => (
-                  <Badge key={a} variant="subtle">
-                    {a}
-                  </Badge>
+                  <Badge key={a}>{a}</Badge>
                 ))}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Footer actions */}
-        <div className="mt-10 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Footer */}
+        <div className="mt-10 flex flex-col-reverse sm:flex-row gap-3 justify-between">
           <Link href="/pricing">
             <Button variant="ghost" className="w-full sm:w-auto">
               View full pricing
@@ -207,16 +194,11 @@ export default function SellNewPage() {
           </Link>
 
           <Link href={nextHref}>
-            <Button variant="primary" className="w-full sm:w-auto">
+            <Button variant="default" className="w-full sm:w-auto">
               Continue
             </Button>
           </Link>
         </div>
-
-        <p className="mt-6 text-xs text-muted">
-          Tip: Start with Pro if you want structure and speed — you can upgrade
-          or add concierge services later.
-        </p>
       </div>
     </div>
   );

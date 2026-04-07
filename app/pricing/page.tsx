@@ -48,7 +48,7 @@ export default function PricingPage() {
 
           <CardFooter>
             <Link href="/sell/new" className="w-full">
-              <Button variant="primary" className="w-full">
+              <Button variant="default" className="w-full">
                 Start Selling
               </Button>
             </Link>
