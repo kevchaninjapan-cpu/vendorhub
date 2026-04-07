@@ -1,6 +1,6 @@
 // app/(site)/layout.tsx
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 
 export default function SiteLayout({
   children,
@@ -52,7 +52,7 @@ export default function SiteLayout({
                 href="/consult"
                 className="hidden sm:inline-block text-sm text-slate-600 hover:text-slate-900 transition-colors"
               >
-                Book a consult
+                FAQ
               </Link>
 
               <Link href="/listings/create">

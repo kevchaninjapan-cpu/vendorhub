@@ -2,9 +2,12 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
+// IMPORTANT: this file is at app/admin/listings/[id]/EditListingForm.tsx
+// To reach root-level components/: go up 4 levels -> ../../../../components/...
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
+import { Textarea } from "../../../../components/ui/textarea";
 
 type Listing = {
   id: string;
@@ -19,12 +22,25 @@ type Listing = {
   postcode: string | null;
 };
 
-export default function EditListingForm({ listingId }: { listingId: string }) {
+type FormState = {
+  title: string;
+  description: string;
+  price_display: string;
+  suburb: string;
+  city: string;
+  region: string;
+  postcode: string;
+};
+
+type Props = { listingId: string };
+
+export default function EditListingForm({ listingId }: Props) {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [saved, setSaved] = React.useState(false);
 
-  const [form, setForm] = React.useState({
+  const [form, setForm] = React.useState<FormState>({
     title: "",
     description: "",
     price_display: "",
@@ -34,17 +50,23 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
     postcode: "",
   });
 
+  const update = (key: keyof FormState, value: string) => {
+    setSaved(false);
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
   const load = React.useCallback(async () => {
     setLoading(true);
     setError(null);
+    setSaved(false);
 
     try {
       const res = await fetch(`/api/admin/listings/${listingId}`, {
         method: "GET",
         cache: "no-store",
       });
-      const json = await res.json();
 
+      const json = await res.json().catch(() => ({} as any));
       if (!res.ok) throw new Error(json?.error ?? "Failed to load listing");
 
       const listing = (json?.listing ?? null) as Listing | null;
@@ -70,20 +92,55 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
     void load();
   }, [load]);
 
-  const update = (key: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
   const onSave = async () => {
-    // ✅ This compiles + gives you a clean UI now.
-    // Wire the update endpoint later (PATCH route).
     setSaving(true);
     setError(null);
+    setSaved(false);
+
+    // Basic validation (minimal, keeps UX clean)
+    const titleTrimmed = form.title.trim();
+    if (!titleTrimmed) {
+      setSaving(false);
+      setError("Title is required.");
+      return;
+    }
 
     try {
-      // Placeholder: implement PATCH /api/admin/listings/[id] when ready
-      // await fetch(`/api/admin/listings/${listingId}`, { method: "PATCH", ... })
-      console.log("Save (mock):", listingId, form);
+      // Send only fields you actually edit
+      const payload = {
+        title: titleTrimmed,
+        description: form.description?.trim() || null,
+        price_display: form.price_display?.trim() || null,
+        suburb: form.suburb?.trim() || null,
+        city: form.city?.trim() || null,
+        region: form.region?.trim() || null,
+        postcode: form.postcode?.trim() || null,
+      };
+
+      const res = await fetch(`/api/admin/listings/${listingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json().catch(() => ({} as any));
+      if (!res.ok) throw new Error(json?.error ?? "Save failed");
+
+      setSaved(true);
+
+      // Optional: refresh form with latest from server response if provided
+      const updated = (json?.listing ?? null) as Listing | null;
+      if (updated) {
+        setForm({
+          title: updated.title ?? "",
+          description: updated.description ?? "",
+          price_display: updated.price_display ?? "",
+          suburb: updated.suburb ?? "",
+          city: updated.city ?? "",
+          region: updated.region ?? "",
+          postcode: updated.postcode ?? "",
+        });
+      }
     } catch (e: any) {
       setError(e?.message ?? "Save failed");
     } finally {
@@ -91,15 +148,22 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
     }
   };
 
-  if (loading) return <div className="text-sm text-muted">Loading details…</div>;
+  if (loading) {
+    return <div className="text-sm text-slate-600">Loading details…</div>;
+  }
 
   if (error) {
     return (
       <div className="space-y-3">
         <div className="text-sm text-red-600">{error}</div>
-        <Button variant="outline" size="sm" onClick={load}>
-          Retry
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => void load()}>
+            Retry
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setError(null)}>
+            Dismiss
+          </Button>
+        </div>
       </div>
     );
   }
@@ -112,16 +176,32 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
         void onSave();
       }}
     >
+      {saved && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Changes saved.
+        </div>
+      )}
+
       <div className="space-y-2">
         <label className="text-sm font-medium">Title</label>
-        <Input value={form.title} onChange={(e) => update("title", e.target.value)} />
+        <Input
+          value={form.title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            update("title", e.target.value)
+          }
+          placeholder="e.g. Modern Villa in Herne Bay"
+        />
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
         <Textarea
           value={form.description}
-          onChange={(e) => update("description", e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            update("description", e.target.value)
+          }
+          rows={6}
+          placeholder="Add key features, upgrades, school zones, etc."
         />
       </div>
 
@@ -130,7 +210,9 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
           <label className="text-sm font-medium">Price (display)</label>
           <Input
             value={form.price_display}
-            onChange={(e) => update("price_display", e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              update("price_display", e.target.value)
+            }
             placeholder="e.g. $1,250,000"
           />
         </div>
@@ -139,7 +221,9 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
           <label className="text-sm font-medium">Postcode</label>
           <Input
             value={form.postcode}
-            onChange={(e) => update("postcode", e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              update("postcode", e.target.value)
+            }
             placeholder="e.g. 1023"
           />
         </div>
@@ -148,15 +232,35 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <label className="text-sm font-medium">Suburb</label>
-          <Input value={form.suburb} onChange={(e) => update("suburb", e.target.value)} />
+          <Input
+            value={form.suburb}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              update("suburb", e.target.value)
+            }
+            placeholder="e.g. Herne Bay"
+          />
         </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">City</label>
-          <Input value={form.city} onChange={(e) => update("city", e.target.value)} />
+          <Input
+            value={form.city}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              update("city", e.target.value)
+            }
+            placeholder="e.g. Auckland"
+          />
         </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Region</label>
-          <Input value={form.region} onChange={(e) => update("region", e.target.value)} />
+          <Input
+            value={form.region}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              update("region", e.target.value)
+            }
+            placeholder="e.g. Auckland Region"
+          />
         </div>
       </div>
 
@@ -164,7 +268,7 @@ export default function EditListingForm({ listingId }: { listingId: string }) {
         <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save changes"}
         </Button>
-        <Button type="button" variant="outline" onClick={load}>
+        <Button type="button" variant="outline" onClick={() => void load()}>
           Reload
         </Button>
       </div>

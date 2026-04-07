@@ -98,7 +98,7 @@ export default function SavingsCalculator() {
 
           <Card title="The VendorHub way" dark badge={tier.name}>
             <RowDark
-              label="VendorHub service fee"
+              label="VendorHub Package Cost"
               value={nzd.format(result.vendorhubFee)}
             />
             <RowDark label="Marketing costs" value={nzd.format(marketingBudget)} />
@@ -178,11 +178,14 @@ export default function SavingsCalculator() {
                 <select
                   className="w-full rounded-xl border px-3 py-2 text-sm"
                   value={tierKey}
-                  onChange={(e) => setTierKey(e.target.value as TierKey)}
+                  onChange={(e) =>
+                    setTierKey(e.target.value as TierKey)
+                  }
                 >
                   {TIERS.map((t) => (
                     <option key={t.key} value={t.key}>
-                      {t.name} ({nzd.format(t.upfront)} + {nzd.format(t.monthly)}/mo)
+                      {t.name} ({nzd.format(t.upfront)} +{" "}
+                      {nzd.format(t.monthly)}/mo)
                     </option>
                   ))}
                 </select>
@@ -204,6 +207,7 @@ export default function SavingsCalculator() {
                 value={nzd.format(result.vendorhubTotal)}
               />
               <Divider />
+              {/* ✅ BIGGER TEXT HERE */}
               <RowTotal
                 label="Estimated savings"
                 value={nzd.format(result.savings)}

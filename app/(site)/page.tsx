@@ -1,7 +1,8 @@
 // app/(site)/page.tsx
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
+import SavingsCalculator from "@/components/SavingsCalculator";
 
 export default function SiteHomePage() {
   return (
@@ -24,14 +25,14 @@ export default function SiteHomePage() {
 
             <p className="mt-6 text-lg leading-relaxed text-slate-600">
               VendorHub is the smart system for private sellers.
-              Where homeowners sell with precision.
+              Where homeowners sell with precision, without the commission, and with complete control.
             </p>
 
             {/* CTAs */}
             <div className="mt-12 flex flex-wrap items-center gap-5">
-              <Link href="/listings/create">
+              <Link href="/app">
                 <Button size="lg" className="px-8 rounded-xl">
-                  Start listing
+                  Get started
                 </Button>
               </Link>
 
@@ -49,7 +50,6 @@ export default function SiteHomePage() {
 
           {/* Right */}
           <div className="relative mt-16 lg:mt-0">
-            {/* Image container */}
             <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden rounded-2xl shadow-[0_40px_80px_-40px_rgba(0,0,0,0.25)]">
               <Image
                 src="/images/hero-home.jpg"
@@ -59,15 +59,13 @@ export default function SiteHomePage() {
                 className="object-cover"
               />
 
-              {/* Gradient overlay (editorial, very subtle) */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/0 to-black/0" />
             </div>
 
-            {/* Proof chip */}
             <div className="absolute bottom-6 left-6 max-w-xs rounded-xl bg-white/90 px-4 py-3 text-sm text-slate-700 backdrop-blur">
               <div className="font-medium">Verified private listing</div>
               <div className="text-slate-500">
-                Our listings are ready to buy - no agents, no fees, no hassle.
+                Our listings are ready to buy — no agents, no fees, no hassle.
               </div>
             </div>
           </div>
@@ -75,7 +73,12 @@ export default function SiteHomePage() {
       </section>
 
       {/* ===================== */}
-      {/* SECTION: POSITIONING */}
+      {/* SAVINGS CALCULATOR */}
+      {/* ===================== */}
+      <SavingsCalculator />
+
+      {/* ===================== */}
+      {/* POSITIONING */}
       {/* ===================== */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="max-w-3xl">
@@ -90,26 +93,34 @@ export default function SiteHomePage() {
 
         <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <h3 className="text-lg font-medium">Smart support for the modern home seller.</h3>
+            <h3 className="text-lg font-medium">
+              Smart support for the modern home seller.
+            </h3>
             <p className="mt-2 text-slate-600">
-              Property valuation, listing optimisation, negotiation tools and marketing strategy 
-              designed to maximise your sale — without the agency fees.
+              Property valuation, listing optimisation, negotiation tools and
+              marketing strategy designed to maximise your sale — without the
+              agency fees.
             </p>
           </div>
 
           <div>
-            <h3 className="text-lg font-medium">The premium way to sell your home privately. </h3>
+            <h3 className="text-lg font-medium">
+              The premium way to sell your home privately.
+            </h3>
             <p className="mt-2 text-slate-600">
-              Decide how much help you need, and how much control you want. 
-              VendorHub gives you the tools to sell on your terms, while keeping 100% of the sale price.
+              Decide how much help you need, and how much control you want.
+              VendorHub gives you the tools to sell on your terms, while keeping
+              100% of the sale price.
             </p>
           </div>
 
           <div>
-            <h3 className="text-lg font-medium">Clarity confidence and cutting edge tools.</h3>
+            <h3 className="text-lg font-medium">
+              Clarity, confidence and cutting‑edge tools.
+            </h3>
             <p className="mt-2 text-slate-600">
-              From enquiries, open homes,contracts and closing, VendorHub coordinates the process
-              end‑to‑end, on your terms.
+              From enquiries and open homes to contracts and closing,
+              VendorHub coordinates the process end‑to‑end.
             </p>
           </div>
         </div>

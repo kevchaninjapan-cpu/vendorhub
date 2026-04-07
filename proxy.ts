@@ -2,7 +2,9 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
+// ✅ Single source of truth for protected areas
+// Your app lives under /app, not /dashboard
+const PROTECTED_PREFIXES = ["/app", "/admin"];
 
 export default async function proxy(request: NextRequest) {
   const response = NextResponse.next();
@@ -19,18 +21,23 @@ export default async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
           });
-        }
-      }
+        },
+      },
     }
   );
 
-  // Refresh tokens
-  const { data: { user } } = await supabase.auth.getUser();
+  // ✅ Always refresh the session (Supabase requirement)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Protect routes
+  // ✅ Determine whether this path requires authentication
   const path = request.nextUrl.pathname;
-  const needsAuth = PROTECTED_PREFIXES.some(p => path === p || path.startsWith(p + "/"));
+  const needsAuth = PROTECTED_PREFIXES.some(
+    (prefix) => path === prefix || path.startsWith(prefix + "/")
+  );
 
+  // ✅ Redirect unauthenticated users
   if (needsAuth && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/sign-in";
@@ -41,10 +48,11 @@ export default async function proxy(request: NextRequest) {
   return response;
 }
 
+// ✅ Only run proxy on relevant paths
 export const config = {
   matcher: [
-    "/dashboard",
-    "/dashboard/:path*",
+    "/app",
+    "/app/:path*",
     "/admin",
     "/admin/:path*",
   ],
