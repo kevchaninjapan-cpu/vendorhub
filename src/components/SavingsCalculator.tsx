@@ -217,10 +217,10 @@ export default function SavingsCalculator() {
             </div>
 
             <a
-              href="/app"
+              href="/learn-more"
               className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Get started
+              Learn more
             </a>
           </div>
         </div>

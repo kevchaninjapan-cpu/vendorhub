@@ -1,0 +1,127 @@
+// app/learn-more/page.tsx
+export default function LearnMorePage() {
+  return (
+    <main className="bg-white">
+      
+      {/* HERO */}
+      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
+        <span className="text-xs tracking-widest text-blue-600 font-semibold">
+          THE JOURNEY
+        </span>
+        <h1 className="mt-4 text-4xl sm:text-5xl font-bold text-gray-900">
+          Selling Reinvented with{" "}
+          <span className="text-blue-600">Intelligent Automation</span>
+        </h1>
+        <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+          A curated eight‑step process combining high‑end marketing with
+          logistical precision. Experience a seamless transition from listing
+          to settlement.
+        </p>
+      </section>
+
+      {/* STEPS */}
+      {steps.map((step, i) => (
+        <section
+          key={step.number}
+          className={`max-w-6xl mx-auto px-6 py-20 grid gap-12 items-center ${
+            i % 2 === 0 ? "md:grid-cols-2" : "md:grid-cols-2 md:flex-row-reverse"
+          }`}
+        >
+          <div>
+            <div className="text-blue-600 text-3xl font-bold">
+              {step.number}
+            </div>
+            <h3 className="mt-4 text-2xl font-semibold">
+              {step.title}
+            </h3>
+            <p className="mt-4 text-gray-600">{step.description}</p>
+            {step.badge && (
+              <div className="mt-4 text-sm text-blue-600 font-medium">
+                {step.badge}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-gray-100 rounded-xl h-64 w-full" />
+          {/* Replace with <Image /> later */}
+        </section>
+      ))}
+
+      {/* CTA */}
+      <section className="max-w-6xl mx-auto px-6 py-24">
+        <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center py-16 px-6">
+          <h2 className="text-3xl font-bold">Ready to sell smarter?</h2>
+          <p className="mt-4 text-blue-100 max-w-xl mx-auto">
+            Join homeowners nationwide leveraging VendorHub automation
+            for premium results.
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            <button className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold">
+              Start Selling Now
+            </button>
+            <button className="border border-white px-6 py-3 rounded-lg font-semibold">
+              Talk to Concierge
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+const steps = [
+  {
+    number: "01",
+    title: "Create an Account",
+    description:
+      "Quick, secure entry into the Seller Studio. Designed for privacy and speed, your dedicated portal is ready in seconds.",
+    badge: "Instant setup",
+  },
+  {
+    number: "02",
+    title: "Build Your Listing",
+    description:
+      "Add professional photos and descriptions. Seamlessly upload essential documents like LIM and Title through our guided compliance portal.",
+    badge: "Guided compliance",
+  },
+  {
+    number: "03",
+    title: "Intelligent Appraisal",
+    description:
+      "Pre‑reading and AI‑driven valuation ensure your listing enters the market with a data‑backed pricing strategy.",
+    badge: "95%+ accuracy rate",
+  },
+  {
+    number: "04",
+    title: "Strategic Distribution",
+    description:
+      "Publish once and distribute everywhere across Trade Me, Realestate.co.nz, HouGarden and social channels.",
+    badge: "One‑click omni‑channel",
+  },
+  {
+    number: "05",
+    title: "Open Home Management",
+    description:
+      "A seamless online booking system with automated reminders and follow‑ups for every buyer.",
+  },
+  {
+    number: "06",
+    title: "Omni‑Inbox Engagement",
+    description:
+      "All communications funnel into one unified inbox with smart automation.",
+  },
+  {
+    number: "07",
+    title: "Encrypted Negotiation & Offers",
+    description:
+      "Negotiate securely and generate contract‑ready documents instantly.",
+    badge: "End‑to‑end encryption",
+  },
+  {
+    number: "08",
+    title: "Seamless Handover",
+    description:
+      "Final checklists and automated reminders guide you to settlement with confidence.",
+    badge: "Success & settlement",
+  },
+];
