@@ -13,8 +13,8 @@ export default function LearnMorePage() {
           <span className="text-blue-600">Intelligent Automation</span>
         </h1>
         <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-          A curated eight‑step process combining high‑end marketing with
-          logistical precision. Experience a seamless transition from listing
+          A curated eight‑step process combining targeted marketing with
+          automated precision. Experience a seamless transition from listing
           to settlement.
         </p>
       </section>
@@ -60,7 +60,7 @@ export default function LearnMorePage() {
               Start Selling Now
             </button>
             <button className="border border-white px-6 py-3 rounded-lg font-semibold">
-              Talk to Concierge
+              Have Questions? Contact Us
             </button>
           </div>
         </div>
@@ -75,46 +75,46 @@ const steps = [
     title: "Create an Account",
     description:
       "Quick, secure entry into the Seller Studio. Designed for privacy and speed, your dedicated portal is ready in seconds.",
-    badge: "Instant setup",
+    badge: "Instant access",
   },
   {
     number: "02",
     title: "Build Your Listing",
     description:
-      "Add professional photos and descriptions. Seamlessly upload essential documents like LIM and Title through our guided compliance portal.",
-    badge: "Guided compliance",
+      "Add professional photos and descriptions. Seamlessly upload essential documents like the LIM and Title through our guided compliance portal.",
+    badge: "Guided compliance, ready to buy",
   },
   {
     number: "03",
     title: "Intelligent Appraisal",
     description:
-      "Pre‑reading and AI‑driven valuation ensure your listing enters the market with a data‑backed pricing strategy.",
+      "Automated valuation based off real time market data to ensure your listing enters the market with a data‑backed pricing strategy.",
     badge: "95%+ accuracy rate",
   },
   {
     number: "04",
     title: "Strategic Distribution",
     description:
-      "Publish once and distribute everywhere across Trade Me, Realestate.co.nz, HouGarden and social channels.",
+      "Publish once and distribute everywhere across Trade Me, Realestate.co.nz, HouGarden and social channels, your listing, your choice.",
     badge: "One‑click omni‑channel",
   },
   {
     number: "05",
     title: "Open Home Management",
     description:
-      "A seamless online booking system with automated reminders and follow‑ups for every buyer.",
+      "A seamless online booking system with automated reminders and follow‑ups for every buyer. Too busy to host? We can help with that too.",
   },
   {
     number: "06",
     title: "Omni‑Inbox Engagement",
     description:
-      "All communications funnel into one unified inbox with smart automation.",
+      "All communications funnel into one unified inbox with smart automation. We filter out the noise and highlight serious buyers, so you can focus on what matters.",
   },
   {
     number: "07",
     title: "Encrypted Negotiation & Offers",
     description:
-      "Negotiate securely and generate contract‑ready documents instantly.",
+      "Negotiate securely, counter off and settle with peace of mind. Generate contract‑ready documents instantly.",
     badge: "End‑to‑end encryption",
   },
   {

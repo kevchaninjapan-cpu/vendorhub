@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* ================================
+   VendorHub Design Tokens
+   Tailwind v4 compatible
+   ================================ */
+
+/* LIGHT MODE (default) */
+:root {
+  /* Brand (from logo) */
+  --vh-ink: 22 28 43;        /* #161C2B */
+  --vh-blue: 16 99 230;      /* #1063E6 */
+  --vh-slate: 42 64 102;     /* #2A4066 */
+  --vh-white: 252 252 252;   /* #FCFCFC */
+  --vh-muted: 130 133 142;   /* #82858E */
+  --vh-border: 197 199 203;  /* #C5C7CB */
+
+  /* Semantic UI tokens */
+  --background: 255 255 255;
+  --foreground: var(--vh-ink);
+
+  --surface: 250 250 252;
+  --surface-2: 245 246 248;
+
+  --muted: var(--vh-muted);
+  --border: var(--vh-border);
+
+  --primary: var(--vh-blue);
+  --primary-foreground: 255 255 255;
+}
+
+/* DARK MODE */
+.dark {
+  --background: var(--vh-ink);
+  --foreground: var(--vh-white);
+
+  --surface: 30 38 58;
+  --surface-2: 36 45 68;
+
+  --muted: 197 199 203;
+  --border: 130 133 142;
+
+  --primary: var(--vh-blue);
+  --primary-foreground: 255 255 255;
+}
+
+/* ================================
+   Base styles only (no @apply)
+   ================================ */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+}
