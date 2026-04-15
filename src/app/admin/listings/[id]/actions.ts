@@ -1,56 +1,25 @@
-// src/app/admin/listings/[id]/actions.ts
+// src/app/dashboard/listings/[id]/actions.ts
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdminAuth } from "@/lib/guards";
+import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/supabase";
 
-/**
- * Archive a listing (sets status to 'withdrawn')
- */
-export async function archiveListingAction(id: string) {
-  // Ensure caller is authenticated as admin
-  await requireAdminAuth();
+type ListingUpdate =
+  Database["public"]["Tables"]["listings"]["Update"];
 
-  const supabase = createAdminClient();
+export async function archiveListingAction(listingId: string) {
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("listings")
     .update({ status: "withdrawn" })
-    .eq("id", id);
+    .eq("id", listingId);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  // Refresh admin pages that read this data
-  revalidatePath("/admin/listings");
-  revalidatePath(`/admin/listings/${id}`);
-
-  // Stay on detail page
-  redirect(`/admin/listings/${id}`);
+  redirect("/dashboard/listings");
 }
-
-/**
- * Restore a listing (sets status back to 'draft')
- */
-export async function restoreListingToDraftAction(id: string) {
-  await requireAdminAuth();
-
-  const supabase = createAdminClient();
-
-  const { error } = await supabase
-    .from("listings")
-    .update({ status: "draft" })
-    .eq("id", id);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  revalidatePath("/admin/listings");
-  revalidatePath(`/admin/listings/${id}`);
-
-  redirect(`/admin/listings/${id}`);
-}
+``

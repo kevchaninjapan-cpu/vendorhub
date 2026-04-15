@@ -1,6 +1,6 @@
 // src/lib/db/listings.ts
 import "server-only";
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Centralised DB helpers for listings.
@@ -50,7 +50,8 @@ export type ListingUpdate = Omit<ListingInsert, "owner_id"> & {
 };
 
 async function getSupabase() {
-  return await createServerClient();
+  // your server wrapper is async in Next 14+ (cookies() is async)
+  return await createClient();
 }
 
 export async function getAllListings(opts?: {
@@ -131,3 +132,4 @@ export async function softDeleteListing(id: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+``

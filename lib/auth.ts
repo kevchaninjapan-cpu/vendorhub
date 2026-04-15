@@ -1,37 +1,30 @@
-import 'server-only'
-import { createServerClient } from "@/lib/supabase/server"
-import type { User } from '@supabase/supabase-js'
+// src/lib/supabase/auth.ts
+import "server-only";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 /**
- * Returns the authenticated user or null.
- * Does NOT redirect.
+ * Returns the signed-in user or redirects to /login.
  */
-export async function requireUser(): Promise<User | null> {
-  const supabase = await createServerClient()
-  const { data, error } = await supabase.auth.getUser()
+export async function requireUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (error) {
-    console.error('[AUTH_REQUIRE_USER_ERROR]', error)
-    return null
-  }
-
-  return data?.user ?? null
+  if (error || !user) redirect("/login");
+  return user;
 }
 
 /**
- * Returns the authenticated admin user or null.
- * Does NOT redirect.
+ * Returns user or null (no redirect).
  */
-export async function requireAdmin(): Promise<User | null> {
-  const user = await requireUser()
-  if (!user) return null
-
-  const role =
-    user.user_metadata?.role ??
-    user.app_metadata?.role
-
-  if (role !== 'admin') return null
-
-  return user
+export async function getUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user ?? null;
 }
 ``

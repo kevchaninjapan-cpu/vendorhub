@@ -1,125 +1,91 @@
-// lib/db/listings.ts
-import 'server-only'
-import { createServerClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server";
 
-/**
- * Centralised DB helpers for listings.
- * Uses the shared Supabase server client wrapper.
- * Safe in Server Components and Route Handlers.
- */
+export async function getListingsByUser(userId: string) {
+  const supabase = await createClient();
 
-export type ListingInsert = {
-  owner_id: string
-  title: string
-  description?: string | null
-  price_numeric?: number | null
-  price_display?: string | null
-  status?: 'draft' | 'active' | 'under_offer' | 'sold' | 'withdrawn'
-  property_type?: 'house' | 'apartment' | 'townhouse' | 'unit' | 'section' | 'lifestyle' | 'rural' | 'other' | null
-  bedrooms?: number | null
-  bathrooms?: number | null
-  car_spaces?: number | null
-  floor_area_m2?: number | null
-  land_area_m2?: number | null
-  year_built?: number | null
-  address_line1?: string | null
-  address_line2?: string | null
-  suburb?: string | null
-  city?: string | null
-  region?: string | null
-  postcode?: string | null
-  latitude?: number | null
-  longitude?: number | null
-  slug?: string | null
-  published_at?: string | null
-  expires_at?: string | null
-}
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
-export type ListingUpdate = Omit<ListingInsert, 'owner_id'> & {
-  deleted_at?: string | null
-  updated_at?: string | null
-}
-
-async function getSupabase() {
-  // Your wrapper already wires cookies + env vars correctly
-  return await createServerClient()
-}
-
-export async function getAllListings(opts?: {
-  includeDeleted?: boolean
-  limit?: number
-}) {
-  const supabase = await getSupabase()
-
-  let q = supabase
-    .from('listings')
-    .select('*')
-    .order('updated_at', { ascending: false })
-    .limit(opts?.limit ?? 200)
-
-  if (!opts?.includeDeleted) {
-    q = q.is('deleted_at', null)
+  if (error) {
+    throw new Error(`Failed to fetch listings: ${error.message}`);
   }
 
-  const { data, error } = await q
-  if (error) throw new Error(error.message)
-  return data ?? []
+  return data;
 }
 
-export async function getListingById(id: string) {
-  const supabase = await getSupabase()
+export async function getListingById(listingId: string) {
+  const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('listings')
-    .select('*')
-    .eq('id', id)
-    .single()
+    .from("listings")
+    .select("*")
+    .eq("id", listingId)
+    .single();
 
-  if (error) throw new Error(error.message)
-  return data
+  if (error) {
+    throw new Error(`Failed to fetch listing: ${error.message}`);
+  }
+
+  return data;
 }
 
-export async function createListing(payload: ListingInsert) {
-  const supabase = await getSupabase()
+export async function createListing(input: {
+  user_id: string;
+  title: string;
+  price?: number | null;
+}) {
+  const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('listings')
-    .insert(payload)
-    .select('*')
-    .single()
+    .from("listings")
+    .insert(input)
+    .select()
+    .single();
 
-  if (error) throw new Error(error.message)
-  return data
+  if (error) {
+    throw new Error(`Failed to create listing: ${error.message}`);
+  }
+
+  return data;
 }
 
-export async function updateListing(id: string, patch: ListingUpdate) {
-  const supabase = await getSupabase()
+export async function updateListing(
+  listingId: string,
+  updates: Partial<{
+    title: string;
+    price: number | null;
+    status: string;
+  }>
+) {
+  const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('listings')
-    .update(patch)
-    .eq('id', id)
-    .select('*')
-    .single()
+    .from("listings")
+    .update(updates)
+    .eq("id", listingId)
+    .select()
+    .single();
 
-  if (error) throw new Error(error.message)
-  return data
+  if (error) {
+    throw new Error(`Failed to update listing: ${error.message}`);
+  }
+
+  return data;
 }
 
-/**
- * Soft delete: sets deleted_at timestamp.
- * Does NOT change enum status 
- */
-export async function softDeleteListing(id: string) {
-  const supabase = await getSupabase()
+export async function deleteListing(listingId: string) {
+  const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('listings')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .select('*')
-    .single()
+  const { error } = await supabase
+    .from("listings")
+    .delete()
+    .eq("id", listingId);
 
-  if (error) throw new Error(error.message)
-  return data
+  if (error) {
+    throw new Error(`Failed to delete listing: ${error.message}`);
+  }
 }
+``

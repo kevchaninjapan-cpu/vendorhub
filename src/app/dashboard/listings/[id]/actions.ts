@@ -1,13 +1,15 @@
+// src/app/dashboard/listings/[id]/actions.ts
 "use server";
 
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/supabase";
+
+type ListingUpdate =
+  Database["public"]["Tables"]["listings"]["Update"];
 
 export async function archiveListingAction(listingId: string) {
-  const supabase = await createServerClient();
-
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth?.user) redirect("/auth/login");
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("listings")
@@ -15,10 +17,9 @@ export async function archiveListingAction(listingId: string) {
     .eq("id", listingId);
 
   if (error) {
-    console.error("[ARCHIVE_LISTING_ACTION_ERROR]", error);
-    throw new Error("Unable to archive listing");
+    throw new Error(error.message);
   }
 
-  redirect(`/admin/listings/${listingId}`);
+  redirect("/dashboard/listings");
 }
 ``

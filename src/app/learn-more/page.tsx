@@ -74,35 +74,35 @@ const steps = [
     number: "01",
     title: "Create an Account",
     description:
-      "Quick, secure entry into the Seller Studio. Designed for privacy and speed, your dedicated portal is ready in seconds.",
+      "Enter your details to create a free account is easy and fast. When you're ready for more get verfied to access all features.",
     badge: "Instant access",
   },
   {
     number: "02",
     title: "Build Your Listing",
     description:
-      "Add professional photos and descriptions. Seamlessly upload essential documents like the LIM and Title through our guided compliance portal.",
-    badge: "Guided compliance, ready to buy",
+      "Do it yourself with our professional guidance, or we can do it with your or for you. Upload Essential Documents to make your property Ready to buy.",
+    badge: "Guided compliance, no time wasted with motivated buyers",
   },
   {
     number: "03",
     title: "Intelligent Appraisal",
     description:
-      "Automated valuation based off real time market data to ensure your listing enters the market with a data‑backed pricing strategy.",
+      "Automated valuation based off real time market data. Our E-Evaluation provides an accurate, current market value for your property.",
     badge: "95%+ accuracy rate",
   },
   {
     number: "04",
-    title: "Strategic Distribution",
+    title: "Strategic Marketing",
     description:
-      "Publish once and distribute everywhere across Trade Me, Realestate.co.nz, HouGarden and social channels, your listing, your choice.",
+      "You choose how and where to market your property. Trade Me, Realestate.co.nz, HouGarden and Social Media channels. It's your listing, your choice.",
     badge: "One‑click omni‑channel",
   },
   {
     number: "05",
     title: "Open Home Management",
     description:
-      "A seamless online booking system with automated reminders and follow‑ups for every buyer. Too busy to host? We can help with that too.",
+      "An online booking system with automated reminders and follow‑ups for every buyer. Too busy to host? We can help with that too.",
   },
   {
     number: "06",
@@ -112,14 +112,14 @@ const steps = [
   },
   {
     number: "07",
-    title: "Encrypted Negotiation & Offers",
+    title: "Be confident with secure and confidential negotiation tools",
     description:
-      "Negotiate securely, counter off and settle with peace of mind. Generate contract‑ready documents instantly.",
+      "Negotiate securely, counter offer and settle with peace of mind. Generate contract‑ready documents instantly. Negotiation tools and guidance to help you get the best offer.",
     badge: "End‑to‑end encryption",
   },
   {
     number: "08",
-    title: "Seamless Handover",
+    title: "Seamless Settlement & Handover",
     description:
       "Final checklists and automated reminders guide you to settlement with confidence.",
     badge: "Success & settlement",
