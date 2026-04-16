@@ -19,14 +19,18 @@ export default function OnboardingDetailsPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [dob, setDob] = useState(""); // HTML date input: YYYY-MM-DD
 
-  const canContinue = fullName.trim().length >= 2;
+  const redirectToSignIn = (path: string) => {
+    router.replace(`/auth/sign-in?redirect=${encodeURIComponent(path)}`);
+  };
 
-  /**
-   * Load:
-   * 1. Auth user (for email + id)
-   * 2. Existing profile data (so form is populated, not hard-coded)
-   */
+  const canContinue =
+    fullName.trim().length >= 2 &&
+    email.trim().length >= 5 &&
+    dob.length === 10; // yyyy-mm-dd
+
+  // Load auth session + existing profile (populate fields)
   useEffect(() => {
     let cancelled = false;
 
@@ -35,31 +39,27 @@ export default function OnboardingDetailsPage() {
 
       const {
         data: { user },
-        error: authErr,
+        error: userErr,
       } = await supabase.auth.getUser();
 
       if (cancelled) return;
 
-      if (authErr) {
-        setSaveState({ status: "error", message: authErr.message });
-        setLoading(false);
+      // ✅ Fix for testers: if session is missing, force re-auth
+      if (userErr || !user) {
+        redirectToSignIn("/onboarding/details");
         return;
       }
 
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
-
+      // Prefill email from auth first (can be overwritten by stored profile.email)
       setEmail(user.email ?? "");
 
       const { data: profile, error: profileErr } = await supabase
         .from("profiles")
-        .select("full_name, phone")
+        .select("full_name, phone, email, date_of_birth")
         .eq("id", user.id)
         .single();
 
-      // Ignore "no rows" error (first-time users)
+      // If no profile row exists yet, ignore (PGRST116 = "no rows" from .single())
       if (profileErr && profileErr.code !== "PGRST116") {
         setSaveState({ status: "error", message: profileErr.message });
         setLoading(false);
@@ -69,6 +69,8 @@ export default function OnboardingDetailsPage() {
       if (profile) {
         setFullName(profile.full_name ?? "");
         setPhone(profile.phone ?? "");
+        setEmail(profile.email ?? user.email ?? "");
+        setDob(profile.date_of_birth ?? "");
       }
 
       setLoading(false);
@@ -81,12 +83,10 @@ export default function OnboardingDetailsPage() {
 
   return (
     <div className="w-full max-w-md">
-      <h1 className="mb-6 text-2xl font-semibold">Onboarding Details</h1>
+      <h1 className="text-2xl font-semibold mb-6">Onboarding Details</h1>
 
       {loading ? (
-        <div className="text-sm text-gray-600">
-          Loading your saved details…
-        </div>
+        <div className="text-sm text-gray-600">Loading your saved details…</div>
       ) : (
         <form
           className="space-y-4"
@@ -98,30 +98,22 @@ export default function OnboardingDetailsPage() {
 
             const {
               data: { user },
-              error: authErr,
+              error: userErr,
             } = await supabase.auth.getUser();
 
-            if (authErr) {
-              setSaveState({ status: "error", message: authErr.message });
+            // ✅ If session disappeared mid-flow, force re-auth
+            if (userErr || !user) {
+              redirectToSignIn("/onboarding/details");
               return;
             }
 
-            if (!user) {
-              router.replace("/login");
-              return;
-            }
-
-            /**
-             * ✅ CRITICAL
-             * Persist onboarding details into public.profiles
-             * Review page reads ONLY from DB
-             */
             const { error: upsertErr } = await supabase.from("profiles").upsert(
               {
                 id: user.id,
-                email: user.email ?? email ?? null,
+                email: email.trim(),
                 full_name: fullName.trim(),
                 phone: phone.trim() || null,
+                date_of_birth: dob, // YYYY-MM-DD -> Postgres date
                 onboarding_status: "details_completed",
               },
               { onConflict: "id" }
@@ -136,20 +128,41 @@ export default function OnboardingDetailsPage() {
           }}
         >
           <input
-            className="w-full rounded border p-2"
+            className="w-full border rounded p-2"
             placeholder="Full name"
-            autoComplete="name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
           />
 
           <input
-            className="w-full rounded border p-2"
-            placeholder="Phone (optional)"
-            autoComplete="tel"
+            type="email"
+            className="w-full border rounded p-2"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+
+          <input
+            className="w-full border rounded p-2"
+            placeholder="Phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            autoComplete="tel"
           />
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Date of birth
+            </label>
+            <input
+              type="date"
+              className="w-full border rounded p-2"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+            />
+          </div>
 
           <div className="text-xs text-gray-500">
             Signed in as <span className="font-medium">{email || "—"}</span>
@@ -164,7 +177,7 @@ export default function OnboardingDetailsPage() {
           <button
             type="submit"
             disabled={!canContinue || saveState.status === "saving"}
-            className="w-full rounded bg-black py-2 text-white disabled:opacity-50"
+            className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
           >
             {saveState.status === "saving" ? "Saving…" : "Continue"}
           </button>
@@ -173,4 +186,3 @@ export default function OnboardingDetailsPage() {
     </div>
   );
 }
-``
