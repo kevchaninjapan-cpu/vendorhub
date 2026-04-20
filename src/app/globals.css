@@ -57,3 +57,30 @@ body {
   background-color: rgb(var(--background));
   color: rgb(var(--foreground));
 }
+@keyframes vh-slide-in {
+  from {
+    transform: translateX(32px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes vh-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-vh-slide-in {
+  animation: vh-slide-in 0.3s ease-out forwards;
+}
+
+.animate-vh-fade-in {
+  animation: vh-fade-in 0.15s ease-out forwards;
+}

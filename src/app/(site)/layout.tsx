@@ -12,56 +12,57 @@ export default function SiteLayout({
       {/* ===================== */}
       {/* TOP NAV */}
       {/* ===================== */}
-      <header className="relative z-10">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex h-16 items-center justify-between">
-            {/* Left */}
-            <div className="flex items-center gap-10">
-              <Link
-                href="/"
-                className="text-sm font-semibold tracking-tight"
-              >
-                VendorHub
-              </Link>
+<header className="sticky top-0 z-50 bg-white">
+  <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+    {/* Left: Brand */}
+    <div className="text-sm font-semibold text-slate-900">
+      VendorHub
+    </div>
 
-              <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-                <Link
-                  href="/solutions"
-                  className="hover:text-slate-900 transition-colors"
-                >
-                  Solutions
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="hover:text-slate-900 transition-colors"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/resources"
-                  className="hover:text-slate-900 transition-colors"
-                >
-                  Resources
-                </Link>
-              </nav>
-            </div>
+    {/* Centre nav */}
+    <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
+      <a
+        href="#features"
+        className="hover:text-slate-900 transition"
+      >
+        Performance
+      </a>
+      <a
+        href="#how-it-works"
+        className="hover:text-slate-900 transition"
+      >
+        How it Works
+      </a>
+      <Link
+        href="/pricing"
+        className="hover:text-slate-900 transition"
+      >
+        Pricing
+      </Link>
+    </nav>
 
-            {/* Right */}
-            <div className="flex items-center gap-4">
-              <Link
-                href="/consult"
-                className="hidden sm:inline-block text-sm text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                FAQ
-              </Link>
+    {/* Right actions */}
+    <div className="flex items-center gap-4">
+      <Link
+        href="/faq"
+        className="text-sm text-slate-600 hover:text-slate-900 transition"
+      >
+        Login
+      </Link>
 
-              <Link href="/listings/create">
-                <Button size="sm">Start listing</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Link
+        href="/onboarding/create"
+        className="rounded-md border border-slate-900 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition"
+      >
+        Create an Account
+      </Link>
+    </div>
+  </div>
+
+  {/* subtle divider */}
+  <div className="h-px bg-slate-200/60" />
+</header>
+``
 
       {/* ===================== */}
       {/* PAGE CONTENT */}
