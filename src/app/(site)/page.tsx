@@ -96,7 +96,7 @@ export default function Page() {
         {/* ================= HERO ================= */}
         <section className="mx-auto max-w-7xl px-6 pt-20 grid gap-12 lg:grid-cols-2 items-center">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-slate-500">
+            <p className="text-xs font-semibold tracking-widest text-slate-900">
               SELL PRIVATELY IN NZ
             </p>
 
@@ -107,7 +107,7 @@ export default function Page() {
               <span className="text-blue-600">in Agent Fees.</span>
             </h1>
 
-            <p className="mt-5 max-w-xl text-slate-600">
+            <p className="mt-5 max-w-xl text-slate-900">
               Traditional real estate agencies are static. Our engine is kinetic. 
               BUilt for the modern Kiwi vendor who demands more control, transparency, and value from their selling experience.
             </p>
@@ -148,11 +148,11 @@ export default function Page() {
 
             {/* floating savings card */}
             <div className="absolute -bottom-6 left-6 w-[260px] rounded-xl bg-white border p-4 shadow-lg">
-              <p className="text-xs font-semibold text-slate-500">
+              <p className="text-xs font-semibold text-slate-900">
                 POTENTIAL SAVINGS
               </p>
               <p className="mt-1 text-xl font-bold">$18k–$40k+</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-900">
                 Depending on sale price &amp; commission
               </p>
             </div>
@@ -164,7 +164,7 @@ export default function Page() {
           <div className="flex items-end justify-between">
             <div>
               <h2 className="text-3xl font-bold">The Performance Edge</h2>
-              <p className="mt-2 max-w-2xl text-slate-600">
+              <p className="mt-2 max-w-2xl text-slate-900">
                 A seller‑first toolkit built to remove agent overhead without
                 removing structure or discipline.
               </p>
@@ -180,7 +180,7 @@ export default function Page() {
               <div className="rounded-xl border p-6">
                 <IconBox>💰</IconBox>
                 <h3 className="mt-4 font-semibold">Maximise Savings</h3>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-slate-900">
                   Replace 2–5% commissions with a predictable, transparent cost.
                 </p>
               </div>
@@ -188,7 +188,7 @@ export default function Page() {
               <div className="rounded-xl border p-6">
                 <IconBox>🔍</IconBox>
                 <h3 className="mt-4 font-semibold">Complete Transparency</h3>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-slate-900">
                   Real time tracking of leads, views and pricing data at your fingertips.
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function Page() {
               <div className="rounded-xl border p-6 w-full">
                 <IconBox>⚙️</IconBox>
                 <h3 className="mt-4 font-semibold">Automated Intelligence</h3>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-slate-900">
                   Auto‑replies, reminders, and prompts keep buyers moving. Recieve offers from buyers, counter offers, and close deals with our secure, encrypted platform.
                 </p>
               </div>
@@ -220,7 +220,7 @@ export default function Page() {
         {/* ================= SEQUENCE OF SALE ================= */}
         <section id="how-it-works" className="mx-auto max-w-7xl px-6 pt-28">
           <h2 className="text-3xl font-bold text-center">The Sequence of Sale</h2>
-          <p className="mt-3 text-center text-slate-600 max-w-2xl mx-auto">
+          <p className="mt-3 text-center text-slate-900 max-w-2xl mx-auto">
             A guided flow from preparation to close built specifically for
             private sellers.
           </p>
@@ -254,7 +254,7 @@ export default function Page() {
                     <span className="text-4xl font-bold text-blue-600">{n}</span>
                     <h3 className="text-xl font-semibold">{title}</h3>
                   </div>
-                  <p className="mt-4 max-w-md text-slate-600">{desc}</p>
+                  <p className="mt-4 max-w-md text-slate-900">{desc}</p>
                 </div>
 
                 {/* wireframe visual */}
@@ -321,7 +321,7 @@ export default function Page() {
                     Calculate your{" "}
                     <span className="text-blue-600">Performance Edge</span>
                   </h2>
-                  <p className="mt-2 max-w-md text-sm text-slate-600">
+                  <p className="mt-2 max-w-md text-sm text-slate-900">
                     Predictive metrics for elite vendors. Compare traditional
                     agency pricing against the streamlined efficiency of
                     VendorHub NZ.
@@ -331,7 +331,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={requestClose}
-                  className="text-slate-500 hover:text-slate-800"
+                  className="text-slate-900 hover:text-slate-800"
                   aria-label="Close calculator"
                 >
                   ✕
@@ -342,7 +342,7 @@ export default function Page() {
                 {/* LEFT: Inputs */}
                 <div className="space-y-6">
                   <div className="rounded-xl border p-6">
-                    <p className="text-xs font-semibold tracking-widest text-slate-500">
+                    <p className="text-xs font-semibold tracking-widest text-slate-900">
                       TARGET ASSET VALUE
                     </p>
                     <input
@@ -354,7 +354,7 @@ export default function Page() {
                   </div>
 
                   <div className="rounded-xl border p-6">
-                    <p className="text-xs font-semibold tracking-widest text-slate-500">
+                    <p className="text-xs font-semibold tracking-widest text-slate-900">
                       COMMISSION %
                     </p>
                     <input
@@ -369,7 +369,7 @@ export default function Page() {
                   </div>
 
                   <div className="rounded-xl border p-6 space-y-4">
-                    <p className="text-xs font-semibold tracking-widest text-slate-500">
+                    <p className="text-xs font-semibold tracking-widest text-slate-900">
                       VENDORHUB PACKAGE
                     </p>
 

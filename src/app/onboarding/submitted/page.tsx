@@ -13,14 +13,17 @@ export default function SubmittedPage() {
             ⏳
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-gray-900">Account status: Temporary (Unverified)</div>
+            <div className="text-sm font-semibold text-gray-900">
+              Account status: Temporary (Unverified)
+            </div>
             <p className="mt-1 text-sm text-gray-600">
-              You can access VendorHub in a limited capacity while verification is in progress.
+              You can access VendorHub in a limited capacity while verification
+              is in progress.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/seller-studio"
+                href="/account"
                 className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
               >
                 Continue to my account

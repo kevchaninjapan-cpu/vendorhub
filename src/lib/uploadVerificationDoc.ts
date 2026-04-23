@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client"; // adjust if your path differs
+import { createClient } from "@/lib/supabase/client";
 
 type DocType = "government_id" | "proof_of_residence";
 
@@ -11,24 +11,16 @@ export async function uploadVerificationDoc({
 }) {
   const supabase = createClient();
 
-  // 1) must have a logged in user (uploads are typically per-user)
-  const {
-    data: { user },
-    error: userErr,
-  } = await supabase.auth.getUser();
-
+  // 1) Auth check
+  const { data: { user }, error: userErr } = await supabase.auth.getUser();
   if (userErr) throw new Error(userErr.message);
-  if (!user) throw new Error("Not authenticated (no user).");
+  if (!user) throw new Error("Not authenticated.");
 
-  // 2) bucket name — this is the #1 cause of "resource does not exist"
-  // CHANGE this to your actual bucket name in Supabase Storage:
   const BUCKET = "verification-documents";
-
-  // 3) deterministic per-user path (keeps objects unique)
   const safeName = file.name.replace(/[^\w.\-]/g, "_");
   const path = `${user.id}/${docType}/${Date.now()}_${safeName}`;
 
-  // 4) upload first
+  // 2) Upload to Storage
   const { error: uploadErr } = await supabase.storage
     .from(BUCKET)
     .upload(path, file, {
@@ -38,23 +30,34 @@ export async function uploadVerificationDoc({
     });
 
   if (uploadErr) {
-    // This will reveal the real cause (bucket missing, RLS, permissions, etc)
-    throw new Error(
-      `Upload failed: ${uploadErr.message} (bucket=${BUCKET}, path=${path})`
-    );
+    throw new Error(`Upload failed: ${uploadErr.message}`);
   }
 
-  // 5) optional: create a signed URL to confirm the object exists
+  // 3) ✅ Save to DB via server route — uses admin client server-side
+  const res = await fetch("/api/docs/upsert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      doc_type: docType,
+      file_path: path,
+      mime_type: file.type || "application/octet-stream",
+      size_bytes: file.size,
+    }),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || !data?.ok) {
+    throw new Error(data?.error ?? "Failed to save document record.");
+  }
+
+  // 4) Signed URL
   const { data: signed, error: signErr } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(path, 60 * 10);
 
   if (signErr) {
-    // If you hit "related resource does not exist" here,
-    // your upload went to a different bucket/path than you think
-    throw new Error(
-      `Signed URL failed: ${signErr.message} (bucket=${BUCKET}, path=${path})`
-    );
+    throw new Error(`Signed URL failed: ${signErr.message}`);
   }
 
   return {
@@ -62,4 +65,3 @@ export async function uploadVerificationDoc({
     signedUrl: signed?.signedUrl ?? null,
   };
 }
-``

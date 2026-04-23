@@ -9,9 +9,7 @@ export default async function OnboardingRouterPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/onboarding/welcome");
-  }
+  if (!user) redirect("/onboarding/welcome");
 
   // 2️⃣ Fetch onboarding state
   const { data: profile } = await supabase
@@ -21,20 +19,18 @@ export default async function OnboardingRouterPage() {
     .single();
 
   // 3️⃣ No profile yet → start onboarding
-  if (!profile) {
-    redirect("/onboarding/details");
-  }
+  if (!profile) redirect("/onboarding/details");
 
-  // 4️⃣ Decide next step
+  // 4️⃣ Decide next step based on status
   switch (profile.verification_status) {
     case "not_started":
       redirect("/onboarding/details");
 
     case "pending":
-      redirect("/onboarding/submitted");
+      redirect("/onboarding/submitted"); // ✅ stays on submitted after login
 
     case "verified":
-      redirect("/seller-studio");
+      redirect("/app/account");
 
     default:
       redirect("/onboarding/details");
