@@ -12,11 +12,14 @@ export default async function OnboardingRouterPage() {
   if (!user) redirect("/onboarding/welcome");
 
   // 2️⃣ Fetch onboarding state
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from("onboarding_profiles")
     .select("verification_status")
     .eq("user_id", user.id)
-    .single();
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const profile = profiles?.[0] ?? null;
 
   // 3️⃣ No profile yet → start onboarding
   if (!profile) redirect("/onboarding/details");
@@ -27,10 +30,10 @@ export default async function OnboardingRouterPage() {
       redirect("/onboarding/details");
 
     case "pending":
-      redirect("/onboarding/submitted"); // ✅ stays on submitted after sign in
+      redirect("/account"); // ✅ Go straight to account
 
     case "verified":
-      redirect("/app/account");
+      redirect("/account"); // ✅ Go straight to account
 
     default:
       redirect("/onboarding/details");

@@ -7,7 +7,7 @@ export default function SignOutButton() {
 
   const handleSignOut = async () => {
     await fetch("/api/auth/sign-out", { method: "POST" });
-    router.push("/onboarding/welcome");
+    router.push("/");
   };
 
   return (
