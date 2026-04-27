@@ -1,10 +1,10 @@
 // src/lib/supabase/auth.ts
 import "server-only";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "./supabase/server";
 
 /**
- * Returns the signed-in user or redirects to /login.
+ * Returns the signed-in user or redirects to /Sign In.
  */
 export async function requireUser() {
   const supabase = await createClient();
@@ -13,7 +13,7 @@ export async function requireUser() {
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) redirect("/login");
+  if (error || !user) redirect("/Sign In");
   return user;
 }
 

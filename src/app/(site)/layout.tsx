@@ -44,10 +44,10 @@ export default function SiteLayout({
     {/* Right actions */}
     <div className="flex items-center gap-4">
       <Link
-        href="/faq"
+        href="/signin"
         className="text-sm text-slate-600 hover:text-slate-900 transition"
       >
-        Login
+        Sign in
       </Link>
 
       <Link

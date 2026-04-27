@@ -27,7 +27,7 @@ export default async function OnboardingRouterPage() {
       redirect("/onboarding/details");
 
     case "pending":
-      redirect("/onboarding/submitted"); // ✅ stays on submitted after login
+      redirect("/onboarding/submitted"); // ✅ stays on submitted after sign in
 
     case "verified":
       redirect("/app/account");

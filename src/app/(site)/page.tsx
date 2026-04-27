@@ -14,7 +14,6 @@ function nzd(n: number) {
   }).format(Math.round(n));
 }
 
-/* simple inline icons (no deps) */
 function IconBox({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
@@ -26,10 +25,11 @@ function IconBox({ children }: { children: React.ReactNode }) {
 /* ================= page ================= */
 
 export default function Page() {
-  /* calculator */
   const [calcOpen, setCalcOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  // ✅ Dual state for salePrice — raw string for display, number for calc
+  const [salePriceRaw, setSalePriceRaw] = useState("1200000");
   const [salePrice, setSalePrice] = useState(1_200_000);
   const [commissionPct, setCommissionPct] = useState(2.5);
 
@@ -41,10 +41,8 @@ export default function Page() {
   const vendorHubCost = 1990;
   const savings = agentFee - vendorHubCost;
 
-  // close fallback timer so overlay never gets "stuck" open if animation events don't fire
   const closeTimerRef = useRef<number | null>(null);
 
-  // lock scroll while open OR closing (so exit animation doesn't re-enable scroll mid-way)
   useEffect(() => {
     document.body.style.overflow = calcOpen || isClosing ? "hidden" : "";
     return () => {
@@ -52,14 +50,9 @@ export default function Page() {
     };
   }, [calcOpen, isClosing]);
 
-  // helper close (plays exit animation, always closes via fallback timeout)
   const requestClose = () => {
     if (!calcOpen || isClosing) return;
-
     setIsClosing(true);
-
-    // Fallback: if onAnimationEnd never fires (missing CSS / reduced motion),
-    // force close after exit duration + small buffer.
     if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
     closeTimerRef.current = window.setTimeout(() => {
       setIsClosing(false);
@@ -67,20 +60,16 @@ export default function Page() {
     }, 220);
   };
 
-  // ESC closes calculator (using same exit animation path)
   useEffect(() => {
     if (!calcOpen) return;
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose();
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcOpen, isClosing]);
 
-  // clear timer on unmount
   useEffect(() => {
     return () => {
       if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
@@ -89,9 +78,6 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* ================= NAV ================= */}
-      {/* (global header now lives in layout.tsx, so no header here) */}
-
       <main>
         {/* ================= HERO ================= */}
         <section className="mx-auto max-w-7xl px-6 pt-20 grid gap-12 lg:grid-cols-2 items-center">
@@ -108,8 +94,9 @@ export default function Page() {
             </h1>
 
             <p className="mt-5 max-w-xl text-slate-900">
-              Traditional real estate agencies are static. Our engine is kinetic. 
-              BUilt for the modern Kiwi vendor who demands more control, transparency, and value from their selling experience.
+              Traditional real estate agencies are static. Our engine is
+              kinetic. Built for the modern Kiwi vendor who demands more
+              control, transparency, and value from their selling experience.
             </p>
 
             <div className="mt-8 flex gap-4">
@@ -123,7 +110,8 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => {
-                  if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+                  if (closeTimerRef.current)
+                    window.clearTimeout(closeTimerRef.current);
                   setIsClosing(false);
                   setCalcOpen(true);
                 }}
@@ -146,7 +134,6 @@ export default function Page() {
               />
             </div>
 
-            {/* floating savings card */}
             <div className="absolute -bottom-6 left-6 w-[260px] rounded-xl bg-white border p-4 shadow-lg">
               <p className="text-xs font-semibold text-slate-900">
                 POTENTIAL SAVINGS
@@ -175,7 +162,6 @@ export default function Page() {
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {/* left stack */}
             <div className="space-y-6">
               <div className="rounded-xl border p-6">
                 <IconBox>💰</IconBox>
@@ -189,12 +175,12 @@ export default function Page() {
                 <IconBox>🔍</IconBox>
                 <h3 className="mt-4 font-semibold">Complete Transparency</h3>
                 <p className="mt-2 text-sm text-slate-900">
-                  Real time tracking of leads, views and pricing data at your fingertips.
+                  Real time tracking of leads, views and pricing data at your
+                  fingertips.
                 </p>
               </div>
             </div>
 
-            {/* centre blue */}
             <div className="rounded-xl bg-blue-600 p-8 text-white">
               <IconBox>🧠</IconBox>
               <h3 className="mt-4 font-semibold">Total DIY Control</h3>
@@ -204,13 +190,14 @@ export default function Page() {
               </p>
             </div>
 
-            {/* right */}
             <div className="flex items-end">
               <div className="rounded-xl border p-6 w-full">
                 <IconBox>⚙️</IconBox>
                 <h3 className="mt-4 font-semibold">Automated Intelligence</h3>
                 <p className="mt-2 text-sm text-slate-900">
-                  Auto‑replies, reminders, and prompts keep buyers moving. Recieve offers from buyers, counter offers, and close deals with our secure, encrypted platform.
+                  Auto‑replies, reminders, and prompts keep buyers moving.
+                  Receive offers from buyers, counter offers, and close deals
+                  with our secure, encrypted platform.
                 </p>
               </div>
             </div>
@@ -219,7 +206,9 @@ export default function Page() {
 
         {/* ================= SEQUENCE OF SALE ================= */}
         <section id="how-it-works" className="mx-auto max-w-7xl px-6 pt-28">
-          <h2 className="text-3xl font-bold text-center">The Sequence of Sale</h2>
+          <h2 className="text-3xl font-bold text-center">
+            The Sequence of Sale
+          </h2>
           <p className="mt-3 text-center text-slate-900 max-w-2xl mx-auto">
             A guided flow from preparation to close built specifically for
             private sellers.
@@ -240,24 +229,24 @@ export default function Page() {
               {
                 n: "03",
                 title: "Manage Enquiries",
-                desc: "Our kinetic hub filters buyer enquires, lets you schedule open homes and manages leads through intelligent automation via a centralised omni-inbox.",
+                desc: "Our kinetic hub filters buyer enquiries, lets you schedule open homes and manages leads through intelligent automation via a centralised omni-inbox.",
               },
               {
                 n: "04",
                 title: "Convert & Close",
-                desc: "Recieve digital offers, compare terms and finalise sales and purchase contracts through our secure, encrypted platform. We can help you settle and handover smoothly and quickly."
+                desc: "Receive digital offers, compare terms and finalise sales and purchase contracts through our secure, encrypted platform. We can help you settle and handover smoothly and quickly.",
               },
             ].map(({ n, title, desc }) => (
               <div key={n} className="grid gap-8 lg:grid-cols-2 items-center">
                 <div>
                   <div className="flex items-center gap-4">
-                    <span className="text-4xl font-bold text-blue-600">{n}</span>
+                    <span className="text-4xl font-bold text-blue-600">
+                      {n}
+                    </span>
                     <h3 className="text-xl font-semibold">{title}</h3>
                   </div>
                   <p className="mt-4 max-w-md text-slate-900">{desc}</p>
                 </div>
-
-                {/* wireframe visual */}
                 <div className="h-40 rounded-xl border bg-slate-100" />
               </div>
             ))}
@@ -269,9 +258,9 @@ export default function Page() {
           <div className="mx-auto max-w-7xl px-6 py-20 text-center text-white">
             <h2 className="text-4xl font-bold">Initialize Your Sale</h2>
             <p className="mt-4 text-white/70">
-              Start with the basics, upgrade if you want us to do it with you or do it for you.
+              Start with the basics, upgrade if you want us to do it with you
+              or do it for you.
             </p>
-
             <div className="mt-8">
               <Link
                 href="/onboarding/create"
@@ -284,10 +273,9 @@ export default function Page() {
         </section>
       </main>
 
-      {/* ================= CALCULATOR OVERLAY (animated + exit + robust close) ================= */}
+      {/* ================= CALCULATOR OVERLAY ================= */}
       {(calcOpen || isClosing) && (
         <div className="fixed inset-0 z-50">
-          {/* Backdrop (fade in/out) */}
           <div
             className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${
               isClosing ? "animate-vh-fade-out" : "animate-vh-fade-in"
@@ -295,17 +283,15 @@ export default function Page() {
             onClick={requestClose}
           />
 
-          {/* Panel (slide in/out) */}
           <aside
             className={`absolute right-0 top-0 h-full w-full max-w-[760px] bg-white shadow-2xl ${
               isClosing ? "animate-vh-slide-out" : "animate-vh-slide-in"
             }`}
             onAnimationEnd={(e) => {
-              // Only react to this element's animation end (avoid bubbling from children)
               if (e.target !== e.currentTarget) return;
-
               if (isClosing) {
-                if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+                if (closeTimerRef.current)
+                  window.clearTimeout(closeTimerRef.current);
                 setIsClosing(false);
                 setCalcOpen(false);
               }
@@ -341,21 +327,36 @@ export default function Page() {
               <div className="mt-10 grid gap-8 lg:grid-cols-2">
                 {/* LEFT: Inputs */}
                 <div className="space-y-6">
+                  {/* ✅ Target Asset Value — no leading zeros */}
                   <div className="rounded-xl border p-6">
                     <p className="text-xs font-semibold tracking-widest text-slate-900">
-                      TARGET ASSET VALUE
+                      ESTIMATED PROPERTY VALUE
                     </p>
                     <input
-                      type="number"
-                      value={salePrice}
-                      onChange={(e) => setSalePrice(Number(e.target.value || 0))}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={salePriceRaw}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "");
+                        const stripped =
+                          digits.replace(/^0+(?=\d)/, "") || "0";
+                        setSalePriceRaw(stripped);
+                        setSalePrice(Number(stripped));
+                      }}
+                      onBlur={() => {
+                        if (!salePriceRaw || salePriceRaw === "0") {
+                          setSalePriceRaw("0");
+                          setSalePrice(0);
+                        }
+                      }}
                       className="mt-3 w-full text-2xl font-bold outline-none"
                     />
                   </div>
 
                   <div className="rounded-xl border p-6">
                     <p className="text-xs font-semibold tracking-widest text-slate-900">
-                      COMMISSION %
+                      AGENT COMMISSION %
                     </p>
                     <input
                       type="number"
@@ -397,12 +398,13 @@ export default function Page() {
                     TOTAL POTENTIAL SAVINGS
                   </p>
 
-                  {/* Optional polish: fade-in with delay (safe style-based delay) */}
                   <p
                     className={`mt-4 text-5xl font-bold ${
                       isClosing ? "" : "animate-vh-fade-in"
                     }`}
-                    style={isClosing ? undefined : { animationDelay: "250ms" }}
+                    style={
+                      isClosing ? undefined : { animationDelay: "250ms" }
+                    }
                   >
                     {nzd(savings)}
                   </p>
@@ -412,12 +414,13 @@ export default function Page() {
                     commission.
                   </p>
 
-                  {/* Summary bar */}
                   <div className="mt-6 h-2 w-full rounded bg-white/20">
-                    <div className="h-2 rounded bg-white" style={{ width: "65%" }} />
+                    <div
+                      className="h-2 rounded bg-white"
+                      style={{ width: "65%" }}
+                    />
                   </div>
 
-                  {/* Comparison cards */}
                   <div className="mt-8 grid grid-cols-2 gap-4">
                     <div className="rounded-lg bg-white/10 p-4">
                       <p className="text-xs text-white/70">Traditional route</p>
@@ -425,7 +428,9 @@ export default function Page() {
                     </div>
 
                     <div className="rounded-lg bg-white p-4 text-blue-700">
-                      <p className="text-xs text-blue-700/70">VendorHub route</p>
+                      <p className="text-xs text-blue-700/70">
+                        VendorHub route
+                      </p>
                       <p className="mt-1 font-semibold">{nzd(vendorHubCost)}</p>
                     </div>
                   </div>
@@ -435,17 +440,13 @@ export default function Page() {
                     onClick={() => {
                       localStorage.setItem(
                         "vh_savings",
-                        JSON.stringify({
-                          salePrice,
-                          agentFee,
-                          savings,
-                        })
+                        JSON.stringify({ salePrice, agentFee, savings })
                       );
                       window.location.href = "/onboarding/create";
                     }}
                     className="mt-8 w-full rounded-md bg-white px-6 py-4 text-center font-semibold text-blue-700 hover:bg-white/90"
                   >
-                    Claim Your Savings Edge →
+                    Claim your savings →
                   </button>
                 </div>
               </div>

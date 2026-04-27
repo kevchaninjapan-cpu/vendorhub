@@ -1,6 +1,6 @@
 // components/Header.tsx
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button } from "./ui";
 
 export default function Header() {
   return (
@@ -27,20 +27,20 @@ export default function Header() {
             <Link href="/#addons" className="hover:text-foreground transition">
               Add-ons
             </Link>
-            <Link href="/#faq" className="hover:text-foreground transition">
+            <Link href="/account" className="hover:text-foreground transition">
               FAQ
             </Link>
           </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Link href="/login" className="hidden sm:inline-flex">
+            <Link href="/signin" className="hidden sm:inline-flex">
               <Button variant="ghost">
-                Log in
+                Sign in
               </Button>
             </Link>
             <Link href="/start" className="inline-flex">
-              <Button variant="default">
+              <Button>
                 Start listing
               </Button>
             </Link>
