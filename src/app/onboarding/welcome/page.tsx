@@ -28,7 +28,7 @@ export default function OnboardingWelcomePage() {
             aria-label="Account"
             className="grid h-8 w-8 place-items-center rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50"
           >
-            <span className="text-xs font-semibold text-slate-600">◦</span>
+            <span className="text-xs font-semibold text-slate-900">◦</span>
           </button>
         </div>
       </header>
@@ -46,7 +46,7 @@ export default function OnboardingWelcomePage() {
             Welcome to <span className="text-blue-600">VendorHub</span>.
           </h1>
 
-          <p className="mt-5 max-w-lg text-sm leading-6 text-slate-600">
+          <p className="mt-5 max-w-lg text-sm leading-6 text-slate-900">
             Begin your journey with VendorHub. Our secure verification process
             ensures a premium ecosystem for buyers and sellers to list, browse,
             and transact intelligently.
@@ -79,7 +79,7 @@ export default function OnboardingWelcomePage() {
                 <div className="text-sm font-semibold text-slate-900">
                   Verification unlocks full access
                 </div>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-900">
                   Create an account to get started. Full verification grants you
                   access to all platform features.
                 </p>
@@ -114,7 +114,7 @@ export default function OnboardingWelcomePage() {
               <div className="mt-2 h-2 w-full rounded-full bg-slate-100">
                 <div className="h-2 w-[35%] rounded-full bg-blue-600" />
               </div>
-              <div className="mt-2 text-[11px] text-slate-600">
+              <div className="mt-2 text-[11px] text-slate-900">
                 Step 1 of 3 · Establish your digital presence
               </div>
             </div>
@@ -138,7 +138,7 @@ function StepTab({
     <div className="flex items-center gap-2">
       <span
         className={`text-sm font-medium ${
-          active ? "text-blue-600" : "text-slate-500"
+          active ? "text-blue-600" : "text-slate-900"
         }`}
       >
         {label}

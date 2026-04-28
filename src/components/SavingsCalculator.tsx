@@ -75,7 +75,7 @@ export default function SavingsCalculator() {
         <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
           Commission is a legacy cost.
         </h2>
-        <p className="mt-3 max-w-3xl text-slate-600">
+        <p className="mt-3 max-w-3xl text-slate-900">
           Quantify what you could retain by using VendorHub instead of the
           traditional commission model.
         </p>
@@ -116,7 +116,7 @@ export default function SavingsCalculator() {
           {/* Inputs */}
           <div className="lg:col-span-7 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h3 className="font-semibold">Quantify your savings in seconds.</h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-900">
               Enter your information below to see how much you can save.
             </p>
 
@@ -172,7 +172,7 @@ export default function SavingsCalculator() {
               />
 
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase text-slate-500">
+                <div className="mb-2 text-xs font-semibold uppercase text-slate-900">
                   Select your service tier
                 </div>
                 <select
@@ -276,7 +276,7 @@ function Divider({ dark }: { dark?: boolean }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-slate-600">{label}</span>
+      <span className="text-slate-900">{label}</span>
       <span className="font-semibold">{value}</span>
     </div>
   );
@@ -351,7 +351,7 @@ function Slider({
 }) {
   return (
     <div>
-      <div className="flex justify-between text-xs font-semibold uppercase text-slate-500">
+      <div className="flex justify-between text-xs font-semibold uppercase text-slate-900">
         <span>{label}</span>
         <span className="text-slate-900">{display}</span>
       </div>

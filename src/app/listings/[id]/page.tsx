@@ -54,7 +54,7 @@ export default async function ListingPage({ params }: PageProps) {
           {listing.title}
         </h1>
 
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-slate-900">
           {[listing.address_line1, listing.address_line2, listing.city]
             .filter(Boolean)
             .join(", ")}
@@ -99,7 +99,7 @@ export default async function ListingPage({ params }: PageProps) {
       )}
 
       {/* Metadata */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-slate-600">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-slate-900">
         <div>
           <div className="text-xs text-gray-500">Listed</div>
           <div className="font-medium">{fmtDate(listing.created_at)}</div>

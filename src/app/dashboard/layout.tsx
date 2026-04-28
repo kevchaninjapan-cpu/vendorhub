@@ -66,7 +66,7 @@ await requireAuth()
         {/* SIDEBAR (Desktop only) */}
         <aside className="hidden md:block">
           <div className="sticky top-[70px] space-y-4">
-            <div className="px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="px-2 text-xs font-semibold uppercase tracking-wide text-slate-900">
               Navigation
             </div>
 
@@ -85,7 +85,7 @@ await requireAuth()
                 My listings
               </Link>
 
-              <div className="px-2 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="px-2 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-900">
                 Admin
               </div>
 

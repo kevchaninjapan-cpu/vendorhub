@@ -61,7 +61,7 @@ export function CardTitle(props: React.HTMLAttributes<HTMLHeadingElement>) {
 
 export function CardDescription(props: React.HTMLAttributes<HTMLParagraphElement>) {
   const { className, ...rest } = props;
-  return <p {...rest} className={cn("text-sm text-slate-600", className)} />;
+  return <p {...rest} className={cn("text-sm text-slate-900", className)} />;
 }
 
 export function CardContent(props: React.HTMLAttributes<HTMLDivElement>) {

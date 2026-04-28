@@ -66,13 +66,13 @@ export default function ResetPasswordPage() {
 
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-900">
             Password Reset
           </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             Set new password
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-900">
             Choose a strong password for your VendorHub account.
           </p>
 
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
 
           {ready && (
             <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
-              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
                 New password
                 <input
                   type="password"
@@ -108,12 +108,12 @@ export default function ResetPasswordPage() {
                   minLength={8}
                   autoComplete="new-password"
                 />
-                <span className="text-[12px] normal-case font-normal text-slate-500">
+                <span className="text-[12px] normal-case font-normal text-slate-900">
                   Minimum 8 characters.
                 </span>
               </label>
 
-              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
                 Confirm new password
                 <input
                   type="password"
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                 {loading ? "Saving…" : "Set new password"}
               </button>
 
-              <div className="text-center text-sm text-slate-600">
+              <div className="text-center text-sm text-slate-900">
                 <Link
                   href="/signin"
                   className="font-semibold text-blue-600 hover:underline"

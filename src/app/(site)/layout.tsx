@@ -20,7 +20,7 @@ export default function SiteLayout({
     </div>
 
     {/* Centre nav */}
-    <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
+    <nav className="hidden md:flex items-center gap-8 text-sm text-slate-900">
       <a
         href="#features"
         className="hover:text-slate-900 transition"
@@ -45,7 +45,7 @@ export default function SiteLayout({
     <div className="flex items-center gap-4">
       <Link
         href="/signin"
-        className="text-sm text-slate-600 hover:text-slate-900 transition"
+        className="text-sm text-slate-900 hover:text-slate-900 transition"
       >
         Sign in
       </Link>
@@ -73,7 +73,7 @@ export default function SiteLayout({
       {/* FOOTER (quiet, optional) */}
       {/* ===================== */}
       <footer className="mt-32 border-t border-slate-200/60">
-        <div className="mx-auto max-w-7xl px-6 py-12 text-sm text-slate-500">
+        <div className="mx-auto max-w-7xl px-6 py-12 text-sm text-slate-900">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>© {new Date().getFullYear()} VendorHub</div>
 

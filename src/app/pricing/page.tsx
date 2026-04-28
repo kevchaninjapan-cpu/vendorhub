@@ -18,7 +18,7 @@ export default function PricingPage() {
     <div className="mx-auto max-w-6xl px-6 py-12 space-y-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold">Pricing</h1>
-        <p className="text-slate-600">
+        <p className="text-slate-900">
           Choose the tier that fits how hands-on you want to be.
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function PricingPage() {
 
           <CardContent>
             <div className="text-3xl font-semibold">$649</div>
-            <div className="text-sm text-slate-600">+ $49/mo</div>
+            <div className="text-sm text-slate-900">+ $49/mo</div>
           </CardContent>
 
           <CardFooter>
@@ -55,7 +55,7 @@ export default function PricingPage() {
 
           <CardContent>
             <div className="text-3xl font-semibold">$3,990</div>
-            <div className="text-sm text-slate-600">+ $99/mo</div>
+            <div className="text-sm text-slate-900">+ $99/mo</div>
           </CardContent>
 
           <CardFooter>
@@ -74,7 +74,7 @@ export default function PricingPage() {
 
           <CardContent>
             <div className="text-3xl font-semibold">$6,495</div>
-            <div className="text-sm text-slate-600">+ $149/mo</div>
+            <div className="text-sm text-slate-900">+ $149/mo</div>
           </CardContent>
 
           <CardFooter>

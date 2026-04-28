@@ -153,7 +153,7 @@ export default function EditListingForm({ listingId, returnTo = "/admin/listings
   if (loading) {
     return (
       <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-        <div className="text-sm text-slate-600">Loading listing…</div>
+        <div className="text-sm text-slate-900">Loading listing…</div>
       </div>
     );
   }
@@ -183,7 +183,7 @@ export default function EditListingForm({ listingId, returnTo = "/admin/listings
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">{heading}</h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-900">
               Update details for this listing and save changes.
             </p>
           </div>
@@ -304,7 +304,7 @@ function Field({
 }) {
   return (
     <label className={`grid gap-2 ${className}`}>
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <span className="text-xs font-semibold uppercase tracking-wide text-slate-900">
         {label}
       </span>
       {children}

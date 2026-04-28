@@ -46,7 +46,7 @@ export default async function AdminListingsPage() {
 
           {!listings?.length && (
             <tr>
-              <td colSpan={3} className="p-4 text-center text-slate-500">
+              <td colSpan={3} className="p-4 text-center text-slate-900">
                 No listings found.
               </td>
             </tr>

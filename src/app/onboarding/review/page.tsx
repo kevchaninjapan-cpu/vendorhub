@@ -67,7 +67,7 @@ export default async function OnboardingReviewPage() {
         <div className="text-sm font-semibold text-slate-900">VendorHub</div>
         <Link
           href="/onboarding/verification-documents"
-          className="text-sm text-slate-600 hover:text-slate-900"
+          className="text-sm text-slate-900 hover:text-slate-900"
         >
           Back
         </Link>
@@ -80,9 +80,9 @@ export default async function OnboardingReviewPage() {
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-6">
-                <div className="text-xs font-semibold text-slate-500">STEP 5 OF 5</div>
+                <div className="text-xs font-semibold text-slate-900">STEP 5 OF 5</div>
                 <h1 className="mt-1 text-2xl font-semibold text-slate-900">Review & Submit</h1>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-900">
                   Please ensure all information is accurate. This summary will be used for final verification.
                 </p>
               </div>
@@ -99,17 +99,17 @@ export default async function OnboardingReviewPage() {
                 </div>
                 <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <dt className="text-xs font-semibold text-slate-500">FULL NAME</dt>
+                    <dt className="text-xs font-semibold text-slate-900">FULL NAME</dt>
                     <dd className="text-sm text-slate-900">{profile.full_name ?? "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-semibold text-slate-500">OFFICIAL EMAIL</dt>
+                    <dt className="text-xs font-semibold text-slate-900">OFFICIAL EMAIL</dt>
                     <dd className="text-sm text-slate-900">
                       {profile.official_email ?? user.email ?? "—"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-semibold text-slate-500">BUSINESS PHONE</dt>
+                    <dt className="text-xs font-semibold text-slate-900">BUSINESS PHONE</dt>
                     <dd className="text-sm text-slate-900">{profile.business_phone ?? "—"}</dd>
                   </div>
                 </dl>
@@ -117,7 +117,7 @@ export default async function OnboardingReviewPage() {
 
               <div className="mt-6 rounded-xl border border-slate-200 p-4">
                 <h2 className="text-sm font-semibold text-slate-900">Final verification</h2>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-slate-900">
                   Upon submission, your profile will enter a review cycle.
                   You'll be notified once verification is complete.
                 </p>

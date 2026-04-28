@@ -42,6 +42,7 @@ function StatusPill({ state }: { state: UploadState }) {
 export default function OnboardingVerificationDocumentsPage() {
   const [govIdUpload, setGovIdUpload] = useState<UploadState>({ status: "idle" });
   const [resUpload, setResUpload] = useState<UploadState>({ status: "idle" });
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
 
   const canContinue = useMemo(
     () => govIdUpload.status === "success" && resUpload.status === "success",
@@ -82,7 +83,7 @@ export default function OnboardingVerificationDocumentsPage() {
     <main className="min-h-screen bg-slate-50">
       <header className="mx-auto flex max-w-2xl items-center justify-between px-6 py-6">
         <div className="text-sm font-semibold text-slate-900">VendorHub</div>
-        <Link href="/onboarding/details" className="text-sm text-slate-600 hover:text-slate-900">
+        <Link href="/onboarding/details" className="text-sm text-slate-900 hover:text-slate-900">
           Back
         </Link>
       </header>
@@ -91,7 +92,7 @@ export default function OnboardingVerificationDocumentsPage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-slate-900">Verification documents</h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-900">
               Upload your documents to verify your account. We'll only use these for verification.
             </p>
           </div>
@@ -104,7 +105,7 @@ export default function OnboardingVerificationDocumentsPage() {
                   <h2 className="text-sm font-semibold text-slate-900">Government ID</h2>
                   <StatusPill state={govIdUpload} />
                 </div>
-                <p className="mt-1 text-sm text-slate-600">Passport or driver licence (max 10MB).</p>
+                <p className="mt-1 text-sm text-slate-900">Passport or driver licence (max 10MB).</p>
                 {govIdUpload.status === "success" && (
                   <p className="mt-2 text-xs text-emerald-700">Uploaded: {govIdUpload.filename}</p>
                 )}
@@ -133,7 +134,7 @@ export default function OnboardingVerificationDocumentsPage() {
                   <h2 className="text-sm font-semibold text-slate-900">Proof of address</h2>
                   <StatusPill state={resUpload} />
                 </div>
-                <p className="mt-1 text-sm text-slate-600">Utility bill or bank statement (max 20MB).</p>
+                <p className="mt-1 text-sm text-slate-900">Utility bill or bank statement (max 20MB).</p>
                 {resUpload.status === "success" && (
                   <p className="mt-2 text-xs text-emerald-700">Uploaded: {resUpload.filename}</p>
                 )}
@@ -156,7 +157,6 @@ export default function OnboardingVerificationDocumentsPage() {
 
           {/* Actions */}
           <div className="mt-6 flex flex-col gap-3">
-            {/* ✅ Fixed: points to /onboarding/review not /onboarding/submitted */}
             <Link
               href={canContinue ? "/onboarding/review" : "#"}
               aria-disabled={!canContinue}
@@ -164,15 +164,57 @@ export default function OnboardingVerificationDocumentsPage() {
                 "inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold",
                 canContinue
                   ? "bg-slate-900 text-white hover:bg-slate-800"
-                  : "cursor-not-allowed bg-slate-200 text-slate-500",
+                  : "cursor-not-allowed bg-slate-200 text-slate-900",
               ].join(" ")}
               onClick={(e) => { if (!canContinue) e.preventDefault(); }}
             >
               Continue
             </Link>
-            <p className="text-xs text-slate-500">
+
+            <p className="text-xs text-slate-900">
               You can continue once both documents are uploaded successfully.
             </p>
+
+            {/* ✅ Skip verification */}
+            {!showSkipWarning ? (
+              <button
+                type="button"
+                onClick={() => setShowSkipWarning(true)}
+                className="mt-2 text-sm text-slate-900 hover:text-slate-700 underline underline-offset-2"
+              >
+                Skip verification for now
+              </button>
+            ) : (
+              <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">⚠️</span>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">
+                      Your account will remain unverified
+                    </p>
+                    <p className="mt-1 text-xs text-amber-800">
+                      Without verification you'll have limited access to VendorHub features.
+                      You can upload documents later from your account settings.
+                    </p>
+                    <div className="mt-4 flex gap-3">
+                      <Link
+                        href="/account"
+                        className="inline-flex items-center rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700"
+                      >
+                        Skip & go to my account
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setShowSkipWarning(false)}
+                        className="inline-flex items-center rounded-lg border border-amber-300 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

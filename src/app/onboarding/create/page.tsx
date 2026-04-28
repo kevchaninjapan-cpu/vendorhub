@@ -55,8 +55,8 @@ export default function OnboardingCreateAccountPage() {
 
         <nav className="hidden items-center gap-8 text-sm md:flex">
           <span className="text-sm font-medium text-blue-600">Account Setup</span>
-          <span className="text-sm font-medium text-slate-500">Identity</span>
-          <span className="text-sm font-medium text-slate-500">Business Info</span>
+          <span className="text-sm font-medium text-slate-900">Identity</span>
+          <span className="text-sm font-medium text-slate-900">Business Info</span>
         </nav>
 
         <div className="w-8" />
@@ -64,18 +64,18 @@ export default function OnboardingCreateAccountPage() {
 
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-900">
             Step 1 of 5
           </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             Create your account
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-900">
             Use an email and password to secure your VendorHub access.
           </p>
 
           <form onSubmit={handleCreate} className="mt-8 grid gap-5">
-            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
               Email address
               <input
                 type="email"
@@ -87,7 +87,7 @@ export default function OnboardingCreateAccountPage() {
               />
             </label>
 
-            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
               Password
               <input
                 type="password"
@@ -98,7 +98,7 @@ export default function OnboardingCreateAccountPage() {
                 required
                 minLength={8}
               />
-              <span className="text-[12px] normal-case font-normal text-slate-500">
+              <span className="text-[12px] normal-case font-normal text-slate-900">
                 Minimum 8 characters recommended.
               </span>
             </label>
@@ -114,7 +114,7 @@ export default function OnboardingCreateAccountPage() {
               {loading ? "Creating…" : "Continue"}
             </button>
 
-            <div className="text-center text-sm text-slate-600">
+            <div className="text-center text-sm text-slate-900">
               Already have an account?{" "}
               <Link href="/signin?redirect=/app" className="font-semibold text-blue-600 hover:underline">
                 Sign in

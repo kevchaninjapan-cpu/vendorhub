@@ -9,7 +9,7 @@ await requireAuth()
   return (
     <div className="p-8 space-y-4">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="text-slate-600">You’re signed in. Content will appear here.</p>
+      <p className="text-slate-900">You’re signed in. Content will appear here.</p>
     </div>
   );
 }

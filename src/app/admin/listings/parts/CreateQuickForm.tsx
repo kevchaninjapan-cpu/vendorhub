@@ -39,7 +39,7 @@ export default function CreateQuickForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-3 border rounded p-4">
       <div className="flex flex-col gap-1">
-        <label className="text-sm text-slate-600">Title *</label>
+        <label className="text-sm text-slate-900">Title *</label>
         <input
           className="border rounded px-3 py-2"
           value={title}
@@ -50,7 +50,7 @@ export default function CreateQuickForm() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-sm text-slate-600">Price (NZD)</label>
+        <label className="text-sm text-slate-900">Price (NZD)</label>
         <input
           className="border rounded px-3 py-2"
           type="number"

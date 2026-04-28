@@ -54,12 +54,12 @@ export default function SignInPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
             Welcome back
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-900">
             Sign in to your VendorHub account to continue.
           </p>
 
           <form onSubmit={handleSignIn} className="mt-8 grid gap-5">
-            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
               Email address
               <input
                 type="email"
@@ -72,7 +72,7 @@ export default function SignInPage() {
               />
             </label>
 
-            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+            <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
               Password
               <input
                 type="password"
@@ -109,7 +109,7 @@ export default function SignInPage() {
               {loading ? "Signing in…" : "Sign in"}
             </button>
 
-            <div className="text-center text-sm text-slate-600">
+            <div className="text-center text-sm text-slate-900">
               Don't have an account?{" "}
               <Link
                 href="/onboarding/create"

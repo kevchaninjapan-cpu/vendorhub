@@ -23,7 +23,7 @@ export default function OnboardingIdentityPage() {
           <StepTab label="Business info" />
         </nav>
 
-        <div className="flex gap-4 text-sm text-slate-500">
+        <div className="flex gap-4 text-sm text-slate-900">
           <span>Marketplace</span>
           <span>Support</span>
         </div>
@@ -33,7 +33,7 @@ export default function OnboardingIdentityPage() {
       <section className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-10 md:grid-cols-[260px_1fr_260px]">
         {/* Left rail */}
         <aside className="hidden md:block">
-          <div className="text-xs font-semibold uppercase text-slate-500">
+          <div className="text-xs font-semibold uppercase text-slate-900">
             Seller Studio
           </div>
           <div className="mt-1 text-xs text-slate-400">
@@ -52,7 +52,7 @@ export default function OnboardingIdentityPage() {
         {/* Main */}
         <section>
           <div className="rounded-2xl bg-white p-8 ring-1 ring-slate-200">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-900">
               Step 3 of 5
             </div>
 
@@ -60,7 +60,7 @@ export default function OnboardingIdentityPage() {
               Verify your current address
             </h1>
 
-            <p className="mt-2 max-w-lg text-sm text-slate-600">
+            <p className="mt-2 max-w-lg text-sm text-slate-900">
               To maintain a secure marketplace, we require a recent proof of
               residency. This information is kept strictly confidential and used
               only for compliance purposes.
@@ -88,7 +88,7 @@ export default function OnboardingIdentityPage() {
                 <div className="text-sm font-medium text-slate-700">
                   Click to upload or drag and drop
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-slate-900">
                   PDF, JPG, or PNG (max 10MB)
                 </div>
               </label>
@@ -102,7 +102,7 @@ export default function OnboardingIdentityPage() {
 
             {/* Document type */}
             <div className="mt-6">
-              <div className="mb-2 text-xs font-semibold uppercase text-slate-500">
+              <div className="mb-2 text-xs font-semibold uppercase text-slate-900">
                 Document type
               </div>
 
@@ -130,7 +130,7 @@ export default function OnboardingIdentityPage() {
               {/* Back */}
               <Link
                 href="/onboarding/details"
-                className="text-sm text-slate-600 hover:underline"
+                className="text-sm text-slate-900 hover:underline"
               >
                 ← Go back
               </Link>
@@ -140,7 +140,7 @@ export default function OnboardingIdentityPage() {
                 {/* ✅ Skip button — CLEAR + VISIBLE */}
                 <Link
                   href="/onboarding/business"
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50"
                 >
                   Skip this step (Account will be unverified)
                 </Link>
@@ -176,7 +176,7 @@ export default function OnboardingIdentityPage() {
               Essential guidance
             </div>
 
-            <ul className="space-y-3 text-sm text-slate-600">
+            <ul className="space-y-3 text-sm text-slate-900">
               <li>
                 <strong>Recent document</strong>
                 <br />
@@ -194,7 +194,7 @@ export default function OnboardingIdentityPage() {
   </li>
   <li>
     <strong>Verified Accounts</strong>
-    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-600">
+    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-900">
       <li>Create property listings</li>
       <li>Use negotiation tools to make and receive offers</li>
       <li>
@@ -229,7 +229,7 @@ function StepTab({
             ? "text-blue-600"
             : complete
             ? "text-slate-400"
-            : "text-slate-500"
+            : "text-slate-900"
         }`}
       >
         {label}
@@ -253,7 +253,7 @@ function RailItem({
           ? "font-semibold text-blue-600"
           : status === "complete"
           ? "text-slate-400"
-          : "text-slate-500"
+          : "text-slate-900"
       }`}
     >
       {label}

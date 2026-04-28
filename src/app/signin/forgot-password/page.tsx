@@ -53,13 +53,13 @@ export default function ForgotPasswordPage() {
 
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-900">
             Password Reset
           </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             Reset your password
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-900">
             Enter your email and we'll send you a link to reset your password.
           </p>
 
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
-              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-500">
+              <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
                 Email address
                 <input
                   type="email"
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
                 {loading ? "Sending…" : "Send reset link"}
               </button>
 
-              <div className="text-center text-sm text-slate-600">
+              <div className="text-center text-sm text-slate-900">
                 Remembered it?{" "}
                 <Link
                   href="/signin"

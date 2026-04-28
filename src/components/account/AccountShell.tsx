@@ -21,21 +21,29 @@ export default function AccountShell({ children }: { children: React.ReactNode }
                   { label: "My Listings", href: "#listings" },
                 ].map((item) => (
                   <a
-                    key={item.href}
+                    key={item.label}
                     href={item.href}
                     className="block rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   >
                     {item.label}
                   </a>
                 ))}
+
+                {/* ✅ Home link to main landing page */}
+                <Link
+                  href="/"
+                  className="block rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  🏠 Home
+                </Link>
               </nav>
 
               <div className="mt-6 border-t pt-4 space-y-2">
                 <Link
                   href="/seller-studio"
-                  className="block text-xs text-gray-500 hover:text-gray-700"
+                  className="text-xs text-gray-500 hover:text-gray-700"
                 >
-                  ← Back to Seller Studio
+                  ← Back to Seller Hub
                 </Link>
               </div>
             </div>

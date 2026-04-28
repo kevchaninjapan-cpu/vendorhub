@@ -22,6 +22,49 @@ const ALLOWED_KEYS: (keyof ProfileUpdate)[] = [
   "country",
 ];
 
+// ✅ GET — load profile for the current user
+export async function GET() {
+  try {
+    const supabase = await supabaseServer();
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+
+    if (userErr || !user) {
+      return NextResponse.json(
+        { ok: false, error: "Not authenticated." },
+        { status: 401 }
+      );
+    }
+
+    const admin = supabaseAdmin();
+    const { data: profiles, error } = await admin
+      .from("onboarding_profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    const profile = profiles?.[0] ?? null;
+
+    return NextResponse.json({ ok: true, profile });
+  } catch (err: any) {
+    return NextResponse.json(
+      { ok: false, error: err?.message ?? "Unexpected error" },
+      { status: 500 }
+    );
+  }
+}
+
+// ✅ PATCH — update profile for the current user
 export async function PATCH(req: NextRequest) {
   try {
     const supabase = await supabaseServer();
@@ -39,7 +82,6 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    // ✅ Typed update object — no unknown values
     const update: ProfileUpdate = {};
     for (const key of ALLOWED_KEYS) {
       if (key in body && typeof body[key] === "string") {
