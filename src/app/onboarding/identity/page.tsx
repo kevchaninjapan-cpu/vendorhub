@@ -13,21 +13,7 @@ export default function OnboardingIdentityPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div className="text-sm font-semibold text-slate-900">VendorHub</div>
-
-        <nav className="hidden items-center gap-8 text-sm md:flex">
-          <StepTab label="Account setup" complete />
-          <StepTab label="Identity" active />
-          <StepTab label="Business info" />
-        </nav>
-
-        <div className="flex gap-4 text-sm text-slate-900">
-          <span>Marketplace</span>
-          <span>Support</span>
-        </div>
-      </header>
+      
 
       {/* Content */}
       <section className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-10 md:grid-cols-[260px_1fr_260px]">

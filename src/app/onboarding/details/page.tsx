@@ -111,15 +111,7 @@ export default function OnboardingDetailsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="mx-auto flex max-w-2xl items-center justify-between px-6 py-6">
-        <div className="text-sm font-semibold text-slate-900">VendorHub</div>
-        <Link
-          href={backHref}
-          className="text-sm text-slate-900 hover:text-slate-900"
-        >
-          Back
-        </Link>
-      </header>
+      
 
       <section className="mx-auto max-w-2xl px-6 pb-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

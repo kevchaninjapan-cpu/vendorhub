@@ -5,34 +5,6 @@ export default function OnboardingWelcomePage() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* Top bar */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div className="text-sm font-semibold text-slate-900">VendorHub</div>
-
-        {/* Step tabs */}
-        <nav className="hidden items-center gap-8 text-sm md:flex">
-          <StepTab active label="Account Setup" />
-          <StepTab label="Identity" />
-          <StepTab label="Business Info" />
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Help"
-            className="grid h-8 w-8 place-items-center rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50"
-          >
-            ?
-          </button>
-          <button
-            type="button"
-            aria-label="Account"
-            className="grid h-8 w-8 place-items-center rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50"
-          >
-            <span className="text-xs font-semibold text-slate-900">◦</span>
-          </button>
-        </div>
-      </header>
-
       {/* Main content */}
       <section className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-6 py-10 md:grid-cols-2 md:py-16">
         {/* Left */}

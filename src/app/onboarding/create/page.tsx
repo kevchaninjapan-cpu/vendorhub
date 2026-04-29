@@ -48,19 +48,7 @@ export default function OnboardingCreateAccountPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/onboarding" className="text-sm font-semibold text-slate-900">
-          VendorHub
-        </Link>
-
-        <nav className="hidden items-center gap-8 text-sm md:flex">
-          <span className="text-sm font-medium text-blue-600">Account Setup</span>
-          <span className="text-sm font-medium text-slate-900">Identity</span>
-          <span className="text-sm font-medium text-slate-900">Business Info</span>
-        </nav>
-
-        <div className="w-8" />
-      </header>
+      
 
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">

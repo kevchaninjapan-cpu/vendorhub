@@ -63,15 +63,7 @@ export default async function OnboardingReviewPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-        <div className="text-sm font-semibold text-slate-900">VendorHub</div>
-        <Link
-          href="/onboarding/verification-documents"
-          className="text-sm text-slate-900 hover:text-slate-900"
-        >
-          Back
-        </Link>
-      </header>
+
 
       <section className="mx-auto max-w-5xl px-6 pb-10">
         <div className="grid gap-6 lg:grid-cols-3">

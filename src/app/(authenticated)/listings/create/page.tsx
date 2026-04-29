@@ -1,5 +1,5 @@
 // src/app/listings/create/page.tsx
-import CreateListingWizard from "@/app/listings/create/CreateListingWizard";
+import CreateListingWizard from "@/app/(authenticated)/listings/create/CreateListingWizard";
 
 export const dynamic = "force-dynamic";
 

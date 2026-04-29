@@ -84,3 +84,12 @@ body {
 .animate-vh-fade-in {
   animation: vh-fade-in 0.15s ease-out forwards;
 }
+@layer base {
+  html {
+    font-size: 18px;          /* bump from default 16px — all rem units scale up */
+  }
+
+  body {
+    @apply font-semibold;     /* Tailwind: 600 weight — or use font-bold for 700 */
+  }
+}
