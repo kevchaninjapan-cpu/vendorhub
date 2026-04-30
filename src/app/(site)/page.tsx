@@ -256,10 +256,9 @@ export default function Page() {
         {/* ================= CTA FOOTER ================= */}
         <section className="mt-32 bg-slate-950">
           <div className="mx-auto max-w-7xl px-6 py-20 text-center text-white">
-            <h2 className="text-4xl font-bold">Initialize Your Sale</h2>
+            Your sale starts <span className="font-bold">now.</span>
             <p className="mt-4 text-white/70">
-              Start with the basics, upgrade if you want us to do it with you
-              or do it for you.
+              Start with the basics, upgrade anytime to learn with us or let us do it for you.
             </p>
             <div className="mt-8">
               <Link
