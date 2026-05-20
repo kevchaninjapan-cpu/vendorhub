@@ -15,19 +15,33 @@ export default function AccountShell({ children }: { children: React.ReactNode }
 
               <nav className="mt-6 space-y-1 text-sm">
                 {[
-                  { label: "Profile", href: "#profile" },
-                  { label: "Verification", href: "#verification" },
-                  { label: "Documents", href: "#documents" },
-                  { label: "My Listings", href: "#listings" },
+                  { label: "Profile", href: "/account#profile" },
+                  { label: "Verification", href: "/account#verification" },
+                  { label: "Documents", href: "/account#documents" },
                 ].map((item) => (
-                  <a
+                  <Link
                     key={item.label}
                     href={item.href}
                     className="block rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 ))}
+
+                {/* ✅ NEW — E-Valuation link */}
+                <Link
+                  href="/account/valuation"
+                  className="block rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  E-Valuation
+                </Link>
+
+                <Link
+                  href="/account#listings"
+                  className="block rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                >
+                  My Listings
+                </Link>
 
                 {/* ✅ Home link to main landing page */}
                 <Link
@@ -49,17 +63,10 @@ export default function AccountShell({ children }: { children: React.ReactNode }
             </div>
           </aside>
 
-          {/* Main */}
-          <main className="col-span-12 md:col-span-9 space-y-6">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">My Account</h1>
-              <p className="mt-2 text-sm text-gray-600">
-                Manage your profile, verification status, documents and listings.
-              </p>
-            </div>
+          {/* Main content */}
+          <main className="col-span-12 md:col-span-9 space-y-8">
             {children}
           </main>
-
         </div>
       </div>
     </div>

@@ -11,7 +11,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prebuild": "node ./scripts/prebuild-guard.mjs"
+    "prebuild": "node ./scripts/prebuild-guard.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

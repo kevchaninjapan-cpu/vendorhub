@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type ProfileUpdate = {
   full_name?: string;
+  official_email?: string;
   business_phone?: string;
   address_line1?: string;
   address_line2?: string;
@@ -14,6 +15,7 @@ type ProfileUpdate = {
 
 const ALLOWED_KEYS: (keyof ProfileUpdate)[] = [
   "full_name",
+  "official_email",
   "business_phone",
   "address_line1",
   "address_line2",
@@ -22,7 +24,7 @@ const ALLOWED_KEYS: (keyof ProfileUpdate)[] = [
   "country",
 ];
 
-// ✅ GET — load profile for the current user
+// ── GET ─ load latest profile for the current user
 export async function GET() {
   try {
     const supabase = await supabaseServer();
@@ -53,9 +55,7 @@ export async function GET() {
       );
     }
 
-    const profile = profiles?.[0] ?? null;
-
-    return NextResponse.json({ ok: true, profile });
+    return NextResponse.json({ ok: true, profile: profiles?.[0] ?? null });
   } catch (err: any) {
     return NextResponse.json(
       { ok: false, error: err?.message ?? "Unexpected error" },
@@ -64,7 +64,7 @@ export async function GET() {
   }
 }
 
-// ✅ PATCH — update profile for the current user
+// ── PATCH ─ update existing profile OR insert a new one if none exists
 export async function PATCH(req: NextRequest) {
   try {
     const supabase = await supabaseServer();
@@ -97,16 +97,55 @@ export async function PATCH(req: NextRequest) {
     }
 
     const admin = supabaseAdmin();
-    const { error } = await admin
-      .from("onboarding_profiles")
-      .update(update)
-      .eq("user_id", user.id);
 
-    if (error) {
+    // 1. Check if a profile already exists for this user
+    const { data: existing, error: selErr } = await admin
+      .from("onboarding_profiles")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (selErr) {
       return NextResponse.json(
-        { ok: false, error: error.message },
+        { ok: false, error: selErr.message },
         { status: 500 }
       );
+    }
+
+    if (existing?.id) {
+      // 2a. Existing row → update it
+      const { error } = await admin
+        .from("onboarding_profiles")
+        .update(update)
+        .eq("id", existing.id);
+
+      if (error) {
+        return NextResponse.json(
+          { ok: false, error: error.message },
+          { status: 500 }
+        );
+      }
+    } else {
+      // 2b. No row yet → insert a fresh one
+      const insertPayload = {
+        user_id: user.id,
+        official_email: update.official_email ?? user.email ?? null,
+        verification_status: "not_started",
+        ...update,
+      };
+
+      const { error } = await admin
+        .from("onboarding_profiles")
+        .insert(insertPayload);
+
+      if (error) {
+        return NextResponse.json(
+          { ok: false, error: error.message },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ ok: true });

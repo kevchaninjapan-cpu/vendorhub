@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+﻿import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+
+const supabase = supabaseAdmin;
+
 
 export default async function AdminListingsPage() {
-  const supabase = createAdminClient();
-
   const { data: listings, error } = await supabase
     .from("listings")
     .select("id, title, status, created_at")

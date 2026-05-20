@@ -20,17 +20,16 @@ export default function OnboardingDetailsPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
+  const [dob, setDob] = useState(""); // kept in UI only (no column yet)
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
   const [postcode, setPostcode] = useState("");
   const [country, setCountry] = useState("NZ");
 
+  // ✅ Only require fields that are actually persisted
   const canContinue =
-    fullName.trim().length >= 2 &&
-    email.trim().length >= 5 &&
-    dob.length === 10;
+    fullName.trim().length >= 2 && email.trim().length >= 5;
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +84,7 @@ export default function OnboardingDetailsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         full_name: fullName.trim(),
+        official_email: email.trim(),
         business_phone: phone.trim(),
         address_line1: addressLine1.trim(),
         address_line2: addressLine2.trim(),
@@ -107,12 +107,8 @@ export default function OnboardingDetailsPage() {
     router.push("/onboarding/verification-documents");
   };
 
-  const backHref = "/onboarding";
-
   return (
     <main className="min-h-screen bg-slate-50">
-      
-
       <section className="mx-auto max-w-2xl px-6 pb-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-6">
@@ -134,7 +130,7 @@ export default function OnboardingDetailsPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Personal Info Section */}
+              {/* Personal Info */}
               <div className="rounded-xl border border-slate-200 p-4 space-y-4">
                 <h2 className="text-sm font-semibold text-slate-900">
                   Personal Information
@@ -178,19 +174,18 @@ export default function OnboardingDetailsPage() {
                   </label>
 
                   <label className="grid gap-1 text-xs font-semibold uppercase text-slate-900">
-                    Date of birth
+                    Date of birth <span className="normal-case text-slate-500">(optional)</span>
                     <input
                       type="date"
                       className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-normal text-slate-900 outline-none ring-blue-600 focus:ring-2"
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
-                      required
                     />
                   </label>
                 </div>
               </div>
 
-              {/* Address Section */}
+              {/* Address */}
               <div className="rounded-xl border border-slate-200 p-4 space-y-4">
                 <h2 className="text-sm font-semibold text-slate-900">
                   Residential Address
@@ -259,7 +254,6 @@ export default function OnboardingDetailsPage() {
                 </div>
               </div>
 
-              {/* Signed in info */}
               <div className="text-xs text-slate-900">
                 Signed in as{" "}
                 <span className="font-medium text-slate-700">
@@ -267,14 +261,12 @@ export default function OnboardingDetailsPage() {
                 </span>
               </div>
 
-              {/* Error */}
               {saveState.status === "error" && (
                 <div className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   {saveState.message}
                 </div>
               )}
 
-              {/* Actions */}
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"

@@ -2,7 +2,7 @@
 import "server-only";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { requireAuth } from "@/lib/guards"
+import { requireAuth } from "@/lib/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +11,13 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  // Protects all /dashboard/** routes
-await requireAuth()
+  await requireAuth();
 
   return (
     <div className="min-h-[100svh] bg-slate-50 text-slate-900">
       {/* TOP NAV */}
       <header className="border-b bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          {/* Brand / Home */}
           <Link
             href="/dashboard"
             className="text-base font-semibold text-slate-900 no-underline"
@@ -27,7 +25,6 @@ await requireAuth()
             VendorHub
           </Link>
 
-          {/* Top-level dashboard nav (borderless links) */}
           <nav className="flex items-center gap-6 text-sm text-slate-700">
             <Link
               href="/dashboard"
@@ -50,7 +47,6 @@ await requireAuth()
               Admin
             </Link>
 
-            {/* Sign out – ensure your /auth/sign-out route or client action actually clears session */}
             <Link
               href="/auth/sign-out"
               className="text-slate-700 hover:text-slate-900 no-underline border-0 ring-0 outline-none focus:outline-none focus:ring-0"
@@ -85,6 +81,19 @@ await requireAuth()
                 My listings
               </Link>
 
+              {/* ── Tools ──────────────────────────────────── */}
+              <div className="px-2 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-900">
+                Tools
+              </div>
+
+              <Link
+                href="/properties/valuation"
+                className="rounded-md px-2 py-1 hover:bg-slate-100 flex items-center gap-2"
+              >
+                🏠 Property Valuation
+              </Link>
+
+              {/* ── Admin ──────────────────────────────────── */}
               <div className="px-2 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-900">
                 Admin
               </div>
@@ -113,7 +122,7 @@ await requireAuth()
           </div>
         </aside>
 
-        {/* MAIN CONTENT – always render children */}
+        {/* MAIN CONTENT */}
         <main className="min-w-0">{children}</main>
       </div>
     </div>
