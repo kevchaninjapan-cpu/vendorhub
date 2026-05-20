@@ -28,7 +28,7 @@
       { "name": "next" }
     ],
 
-    "types": ["node", "jest"]
+    "types": ["node",]
   },
 
   "include": [
