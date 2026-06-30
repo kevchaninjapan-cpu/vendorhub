@@ -9,20 +9,27 @@ import {
   listingsBbox,
 } from "@/lib/marketplace/geo";
 
-// LINZ Basemaps free vector style — Topographic, NZ-hosted.
-// You can register for a key at https://basemaps.linz.govt.nz/ and put it
-// in NEXT_PUBLIC_LINZ_API_KEY. The default below works for low traffic.
-const LINZ_STYLE = (key?: string) =>
-  `https://basemaps.linz.govt.nz/v1/styles/topographic.json${
-    key ? `?api=${key}` : ""
+// LINZ Basemaps vector style — Topographic, NZ-hosted, free.
+// Register at https://basemaps.linz.govt.nz/ to get an API key.
+function linzStyleUrl(): string {
+  const key = process.env.NEXT_PUBLIC_LINZ_API_KEY;
+  if (!key) {
+    console.warn(
+      "[MapCanvas] NEXT_PUBLIC_LINZ_API_KEY is not set. " +
+      "Get a free key at https://basemaps.linz.govt.nz/"
+    );
+  }
+  return `https://basemaps.linz.govt.nz/v1/styles/topographic-v2.json?api=${
+    key ?? ""
   }`;
+}
 
 export default function MapCanvas({
   listings,
   onBboxChange,
 }: {
   listings: SearchListing[];
-  onBboxChange: (bbox: [number, number, number, number]) => void;
+onBboxChange: (bbox: [number, number, number, number]) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
@@ -33,11 +40,22 @@ export default function MapCanvas({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: LINZ_STYLE(process.env.NEXT_PUBLIC_LINZ_API_KEY),
+      style: linzStyleUrl(),
       center: AUCKLAND_DEFAULT_VIEW.center,
       zoom: AUCKLAND_DEFAULT_VIEW.zoom,
     });
     mapRef.current = map;
+
+    // Helpful error logging if tiles fail to load (usually a bad API key)
+    map.on("error", (e) => {
+      console.error("[MapCanvas] MapLibre error:", e?.error?.message ?? e);
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(
+      new maplibregl.AttributionControl({ compact: true }),
+      "bottom-right"
+    );
 
     map.on("moveend", () => {
       const b = map.getBounds();
@@ -71,7 +89,7 @@ export default function MapCanvas({
         ?.toLowerCase()
         .replace(/\s+/g, "-")}/${l.slug}`;
       el.className =
-        "block rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-semibold text-white shadow";
+        "block rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-semibold text-white shadow hover:bg-emerald-700";
       el.textContent = l.asking_price
         ? `$${Math.round(l.asking_price / 1000)}k`
         : "•";

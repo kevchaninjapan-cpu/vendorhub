@@ -135,35 +135,39 @@ export async function createOrUpdateDraft(
 ) {
   const { supabase, user } = await requireUser();
 
-  const payload: Record<string, unknown> = {
-    member_id: user.id,
-    status: "draft",
-    pack_tier: input.pack_tier ?? "starter",
-    dvr_record_id: input.dvr_record_id ?? null,
-    auckland_rate_assessment_id: input.auckland_rate_assessment_id ?? null,
-    formatted_address: input.formatted_address ?? null,
-    address_norm: input.address_norm ?? null,
-    street_address: input.street_address ?? null,
-    suburb: input.suburb ?? null,
-    region: input.region ?? null,
-    postcode: input.postcode ?? null,
-    property_type: input.property_type ?? null,
-    bedrooms: input.bedrooms ?? null,
-    bathrooms: input.bathrooms ?? null,
-    parking: input.parking ?? null,
-    floor_area_sqm: input.floor_area_sqm ?? null,
-    land_area_sqm: input.land_area_sqm ?? null,
-    year_built: input.year_built ?? null,
-    chattels: input.chattels ?? [],
-    headline: input.headline ?? null,
-    description: input.description ?? null,
-    method_of_sale: input.method_of_sale ?? null,
-    asking_price: input.asking_price ?? null,
-    price_text: input.price_text ?? null,
-    tender_close_at: input.tender_close_at ?? null,
-    beo_amount: input.beo_amount ?? null,
-    disclosures: input.disclosures ?? {},
-  };
+ // Helper: convert "" to null so Postgres doesn't choke on typed columns
+const emptyToNull = <T>(v: T): T | null =>
+  typeof v === "string" && v.trim() === "" ? null : v;
+
+const payload: Record<string, unknown> = {
+  member_id: user.id,
+  status: "draft",
+  pack_tier: input.pack_tier ?? "starter",
+  dvr_record_id: emptyToNull(input.dvr_record_id ?? null),
+  auckland_rate_assessment_id: emptyToNull(input.auckland_rate_assessment_id ?? null),
+  formatted_address: emptyToNull(input.formatted_address ?? null),
+  address_norm: emptyToNull(input.address_norm ?? null),
+  street_address: emptyToNull(input.street_address ?? null),
+  suburb: emptyToNull(input.suburb ?? null),
+  region: emptyToNull(input.region ?? null),
+  postcode: emptyToNull(input.postcode ?? null),
+  property_type: emptyToNull(input.property_type ?? null),
+  bedrooms: input.bedrooms ?? null,
+  bathrooms: input.bathrooms ?? null,
+  parking: input.parking ?? null,
+  floor_area_sqm: input.floor_area_sqm ?? null,
+  land_area_sqm: input.land_area_sqm ?? null,
+  year_built: input.year_built ?? null,
+  chattels: input.chattels ?? [],
+  headline: emptyToNull(input.headline ?? null),
+  description: emptyToNull(input.description ?? null),
+  method_of_sale: emptyToNull(input.method_of_sale ?? null),
+  asking_price: input.asking_price ?? null,
+  price_text: emptyToNull(input.price_text ?? null),
+  tender_close_at: emptyToNull(input.tender_close_at ?? null),
+  beo_amount: input.beo_amount ?? null,
+  disclosures: input.disclosures ?? {},
+};
 
   if (typeof input.lat === "number" && typeof input.lng === "number") {
     payload.geom = `SRID=4326;POINT(${input.lng} ${input.lat})`;

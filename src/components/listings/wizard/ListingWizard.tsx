@@ -36,46 +36,56 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function persist(next: Partial<ListingDraft>) {
-    setBusy(true); setErr(null);
+  // Returns true on success so callers know whether to advance.
+  async function persist(next: Partial<ListingDraft>): Promise<boolean> {
+    setBusy(true);
+    setErr(null);
     try {
       const merged = { ...draft, ...next };
       const { id } = await createOrUpdateDraft(merged);
       setDraft({ ...merged, id });
+      // eslint-disable-next-line no-console
+      console.log("[ListingWizard] persisted draft", { id, merged });
+      return true;
     } catch (e: any) {
-      setErr(e.message ?? "Could not save");
+      // eslint-disable-next-line no-console
+      console.error("[ListingWizard] persist failed:", e);
+      setErr(e?.message ?? "Could not save");
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
   async function onNext(next: Partial<ListingDraft>) {
-    await persist(next);
-    setStep(s => Math.min(s + 1, 4));
+    const ok = await persist(next);
+    if (ok) setStep((s) => Math.min(s + 1, 4));
   }
 
   async function onSubmit() {
     if (!draft.id) return;
-    setBusy(true); setErr(null);
+    setBusy(true);
+    setErr(null);
     try {
       await submitForReview(draft.id, draft);
       router.push(`/account/listings?submitted=${draft.id}`);
     } catch (e: any) {
-      setErr(e.message ?? "Could not submit");
+      setErr(e?.message ?? "Could not submit");
     } finally {
       setBusy(false);
     }
   }
 
   function onSaveDraft() {
-    setErr(null); setNotice(null);
+    setErr(null);
+    setNotice(null);
     startSaveDraft(async () => {
       try {
         await createOrUpdateDraft(draft);
         setNotice("Draft saved.");
         setTimeout(() => setNotice(null), 3000);
       } catch (e: any) {
-        setErr(e.message ?? "Could not save draft");
+        setErr(e?.message ?? "Could not save draft");
       }
     });
   }
@@ -89,7 +99,7 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
         await withdrawListing(draft.id!);
         router.push("/account/listings");
       } catch (e: any) {
-        setErr(e.message ?? "Could not withdraw");
+        setErr(e?.message ?? "Could not withdraw");
       }
     });
   }
@@ -128,7 +138,12 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
       )}
       {err && (
         <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {err}
+          <p className="font-semibold">Couldn&apos;t save your changes</p>
+          <p className="mt-1">{err}</p>
+          <p className="mt-1 text-xs">
+            Fix the issue above and try Continue again. Your form values are
+            still here.
+          </p>
         </div>
       )}
 
@@ -136,20 +151,36 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
         <Step1Address draft={draft} busy={busy} onNext={(v) => onNext(v)} />
       )}
       {step === 1 && (
-        <Step2Details draft={draft} busy={busy}
-          onBack={() => setStep(0)} onNext={(v) => onNext(v)} />
+        <Step2Details
+          draft={draft}
+          busy={busy}
+          onBack={() => setStep(0)}
+          onNext={(v) => onNext(v)}
+        />
       )}
       {step === 2 && (
-        <Step3Media draft={draft} busy={busy}
-          onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        <Step3Media
+          draft={draft}
+          busy={busy}
+          onBack={() => setStep(1)}
+          onNext={() => setStep(3)}
+        />
       )}
       {step === 3 && (
-        <Step4Disclosures draft={draft} busy={busy}
-          onBack={() => setStep(2)} onNext={(v) => onNext(v)} />
+        <Step4Disclosures
+          draft={draft}
+          busy={busy}
+          onBack={() => setStep(2)}
+          onNext={(v) => onNext(v)}
+        />
       )}
       {step === 4 && (
-        <Step5Review draft={draft} busy={busy}
-          onBack={() => setStep(3)} onSubmit={onSubmit} />
+        <Step5Review
+          draft={draft}
+          busy={busy}
+          onBack={() => setStep(3)}
+          onSubmit={onSubmit}
+        />
       )}
     </div>
   );

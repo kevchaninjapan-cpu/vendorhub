@@ -64,9 +64,8 @@ export default function SearchView({
       <header className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            {data.total.toLocaleString()} property
-            {data.total === 1 ? "" : "ies"}
-          </h1>
+  {data.total.toLocaleString()} {data.total === 1 ? "property" : "properties"}
+</h1>
           <p className="text-xs text-muted-foreground">
             Independent listings across New Zealand
           </p>

@@ -4,10 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { detailsStepSchema } from "@/lib/listings/schema";
+import type { ListingDraft } from "@/types/marketplace";
 
 type DetailsInput = z.input<typeof detailsStepSchema>;
 type DetailsOutput = z.output<typeof detailsStepSchema>;
-import type { ListingDraft } from "@/types/marketplace";
 
 type Props = {
   draft: ListingDraft;
@@ -17,45 +17,77 @@ type Props = {
 };
 
 export function Step2Details({ draft, busy, onBack, onNext }: Props) {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<
-  DetailsInput,
-  unknown,
-  DetailsOutput
->({
-    resolver: zodResolver(detailsStepSchema),
-    defaultValues: {
-      pack_tier: draft.pack_tier ?? "starter",
-      property_type: (draft.property_type ?? "house"),
-      bedrooms: draft.bedrooms ?? 3,
-      bathrooms: draft.bathrooms ?? 1,
-      parking: draft.parking ?? 1,
-      floor_area_sqm: draft.floor_area_sqm ?? undefined,
-      land_area_sqm: draft.land_area_sqm ?? undefined,
-      year_built: draft.year_built ?? undefined,
-      chattels: draft.chattels ?? [],
-      headline: draft.headline ?? "",
-      description: draft.description ?? "",
-      method_of_sale: draft.method_of_sale ?? "asking_price",
-      asking_price: draft.asking_price ?? undefined,
-      price_text: draft.price_text ?? "",
-      tender_close_at: draft.tender_close_at ?? "",
-      beo_amount: draft.beo_amount ?? undefined,
-    },
-  });
+  const { register, handleSubmit, watch, formState: { errors, isSubmitted } } =
+    useForm<DetailsInput, unknown, DetailsOutput>({
+      resolver: zodResolver(detailsStepSchema),
+      defaultValues: {
+        pack_tier: draft.pack_tier ?? "starter",
+        property_type: (draft.property_type ?? "house"),
+        bedrooms: draft.bedrooms ?? 3,
+        bathrooms: draft.bathrooms ?? 1,
+        parking: draft.parking ?? 1,
+        floor_area_sqm: draft.floor_area_sqm ?? undefined,
+        land_area_sqm: draft.land_area_sqm ?? undefined,
+        year_built: draft.year_built ?? undefined,
+        chattels: (draft.chattels ?? []) as any,
+        headline: draft.headline ?? "",
+        description: draft.description ?? "",
+        method_of_sale: draft.method_of_sale ?? "asking_price",
+        asking_price: draft.asking_price ?? undefined,
+        price_text: draft.price_text ?? undefined,
+tender_close_at: draft.tender_close_at ?? undefined,
+        beo_amount: draft.beo_amount ?? undefined,
+      },
+    });
 
   const method = watch("method_of_sale");
+
+  // Pretty-printed list of all visible validation errors
+  const errorList = Object.entries(errors)
+    .map(([field, err]) => ({
+      field,
+      message: (err as any)?.message ?? "Invalid value",
+    }))
+    .filter((e) => !!e.message);
 
   return (
     <form
       className="space-y-6"
-      onSubmit={handleSubmit((v) => onNext({
-        ...v,
-        chattels: typeof (v as any).chattels === "string"
-          ? ((v as any).chattels as string).split(",").map(s => s.trim()).filter(Boolean)
-          : v.chattels,
-      }))}
+      onSubmit={handleSubmit(
+        (v) =>
+          onNext({
+            ...v,
+            chattels:
+              typeof (v as any).chattels === "string"
+                ? ((v as any).chattels as string)
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : v.chattels,
+          }),
+        (errs) => {
+          // eslint-disable-next-line no-console
+          console.warn("[Step2Details] form invalid:", errs);
+        }
+      )}
     >
       <h2 className="text-xl font-semibold">Step 2 — Property details</h2>
+
+      {/* Visible error summary so users know why Continue is rejected */}
+      {isSubmitted && errorList.length > 0 && (
+        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          <p className="font-semibold">
+            Please fix the following before continuing:
+          </p>
+          <ul className="ml-4 mt-1 list-disc space-y-0.5">
+            {errorList.map((e) => (
+              <li key={e.field}>
+                <strong>{e.field.replace(/_/g, " ")}:</strong> {e.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Pack tier" error={errors.pack_tier?.message}>
@@ -128,11 +160,14 @@ export function Step2Details({ draft, busy, onBack, onNext }: Props) {
           placeholder="Sunny family home in central Ellerslie" />
       </Field>
 
-      <Field label="Description" error={errors.description?.message}>
+      <Field
+        label="Description (min 50 characters)"
+        error={errors.description?.message}
+      >
         <textarea {...register("description")} className="input min-h-[160px]" />
       </Field>
 
-      <Field label="Chattels (comma separated)">
+      <Field label="Chattels (comma separated)" error={(errors as any).chattels?.message}>
         <input
           defaultValue={(draft.chattels ?? []).join(", ")}
           {...register("chattels" as any)}
@@ -142,9 +177,14 @@ export function Step2Details({ draft, busy, onBack, onNext }: Props) {
       </Field>
 
       <div className="flex justify-between">
-        <button type="button" onClick={onBack} className="text-sm underline">Back</button>
-        <button disabled={busy}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <button type="button" onClick={onBack} className="text-sm underline">
+          Back
+        </button>
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
           Continue
         </button>
       </div>

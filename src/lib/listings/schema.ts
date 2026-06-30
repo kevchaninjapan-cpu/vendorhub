@@ -34,24 +34,62 @@ export const detailsStepSchema = z.object({
   land_area_sqm: z.coerce.number().positive().nullable().optional(),
   year_built: z.coerce.number().int().min(1800).max(new Date().getFullYear() + 1)
     .nullable().optional(),
-  chattels: z.array(z.string()).default([]),
+  chattels: z
+  .preprocess(
+    (v) =>
+      typeof v === "string"
+        ? v.split(",").map((s) => s.trim()).filter(Boolean)
+        : v ?? [],
+    z.array(z.string())
+  )
+  .default([]),
   headline: z.string().min(10, "Add a short headline").max(120),
   description: z.string().min(50, "Add at least a short description").max(8000),
 
-  method_of_sale: z.enum(["asking_price", "negotiation", "tender", "beo"]),
-  asking_price: z.coerce.number().positive().nullable().optional(),
-  price_text: z.string().nullable().optional(),
-  tender_close_at: z.string().nullable().optional(),
-  beo_amount: z.coerce.number().positive().nullable().optional(),
+method_of_sale: z.enum(["asking_price", "negotiation", "tender", "beo"]),
+// Use preprocess to convert empty strings → undefined before number validation
+asking_price: z
+  .preprocess(
+    (v) => (v === "" || v == null ? undefined : v),
+    z.coerce.number().positive().optional()
+  )
+  .optional(),
+price_text: z.string().optional().nullable(),
+tender_close_at: z.string().optional().nullable(),
+beo_amount: z
+  .preprocess(
+    (v) => (v === "" || v == null ? undefined : v),
+    z.coerce.number().positive().optional()
+  )
+  .optional(),
 }).superRefine((v, ctx) => {
-  if (v.method_of_sale === "asking_price" && !v.asking_price) {
-    ctx.addIssue({ code: "custom", path: ["asking_price"], message: "Required for asking price" });
+  if (v.method_of_sale === "asking_price" && (!v.asking_price || v.asking_price <= 0)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["asking_price"],
+      message: "Asking price is required and must be greater than 0",
+    });
+  }
+  if (v.method_of_sale === "negotiation" && (!v.price_text || v.price_text.trim().length === 0)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["price_text"],
+      message: "Add price text like 'Buyer enquiry over $1.2M'",
+    });
   }
   if (v.method_of_sale === "tender" && !v.tender_close_at) {
-    ctx.addIssue({ code: "custom", path: ["tender_close_at"], message: "Tender close date required" });
+    ctx.addIssue({
+      code: "custom",
+      path: ["tender_close_at"],
+      message: "Tender close date required",
+    });
   }
-  if (v.method_of_sale === "beo" && !v.beo_amount) {
-    ctx.addIssue({ code: "custom", path: ["beo_amount"], message: "BEO amount required" });
+  if (v.method_of_sale === "beo" && (!v.beo_amount || v.beo_amount <= 0)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["beo_amount"],
+      message: "BEO amount required and must be greater than 0",
+    });
   }
 });
 
