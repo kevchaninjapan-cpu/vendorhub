@@ -23,7 +23,6 @@ export type ValuationSource = {
 
 export type RatingValuation = {
   capitalValue: number;
-  landValue: number;
   improvementsValue?: number;
   effectiveDate?: string;
   valuationDate: string;
@@ -103,7 +102,6 @@ export type ValuationResult = {
   adjustments?: AdjustmentExplanation[];
   baseline?: {
     capitalValue: number;
-    landValue?: number;
     improvementsValue?: number;
     valuationDate: string;
     source?: string;

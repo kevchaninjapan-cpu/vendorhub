@@ -13,10 +13,12 @@ describe("validateValuationInput", () => {
     },
   };
 
-  // Helper — extracts errors array from a failed validation
+  // Helper — extracts errors array from a failed validation.
+  // Uses `'errors' in result` so TS narrows even if the union
+  // isn't strictly discriminated by the `ok` field.
   function getErrors(result: ValidationResult): string[] {
-    if (result.ok) throw new Error("Expected validation to fail");
-    return result.errors;
+    if ("errors" in result) return result.errors;
+    throw new Error("Expected validation to fail");
   }
 
   it("accepts a minimal valid payload", () => {

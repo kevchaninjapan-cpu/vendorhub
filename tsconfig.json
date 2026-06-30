@@ -28,7 +28,7 @@
       { "name": "next" }
     ],
 
-    "types": ["node",]
+    "types": ["vitest/globals", "node"]
   },
 
   "include": [
@@ -39,5 +39,15 @@
     ".next/dev/types/**/*.ts"
   ],
 
-  "exclude": ["node_modules"]
+"exclude": [
+  "node_modules",
+  "src/app/_admin_legacy/**",
+  "src/app/api/_admin_legacy/**",
+  "src/app/_onboarding_legacy/**",
+  "src/app/_verification_legacy/**",
+  "src/app/api/_docs_legacy/**",
+  "src/app/api/_onboarding_legacy/**",
+  "src/app/api/_verification_legacy/**",
+  "src/app/api/_listings_legacy/**"
+]
 }

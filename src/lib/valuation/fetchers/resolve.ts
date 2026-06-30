@@ -197,7 +197,6 @@ export async function resolveValuationInput(
       // ── Use the 2024 reval (LCV) if available, else current CV ──
       const useLatest = akl.LCV && akl.LCV > 0;
       const cv = useLatest ? akl.LCV : akl.CV;
-      const lv = useLatest ? akl.LLV : akl.LV;
       const valDate = epochToIso(
         useLatest && akl.LATESTVALUATIONDATE
           ? akl.LATESTVALUATIONDATE
@@ -216,7 +215,6 @@ export async function resolveValuationInput(
       const input: ValuationEngineInput = {
         ratingValuation: {
           capitalValue: cv,
-          landValue: lv || undefined,
           valuationDate: valDate,
           source: "COUNCIL_CV",
         },
@@ -300,7 +298,6 @@ export async function resolveValuationInput(
   const input: ValuationEngineInput = {
     ratingValuation: {
       capitalValue: dvr.capital_value,
-      landValue: dvr.land_value || undefined,
       improvementsValue: dvr.improvements_value || undefined,
       valuationDate: cleanDate,
       source: "LINZ_DVR",

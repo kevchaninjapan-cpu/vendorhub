@@ -1,13 +1,12 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vendorhub.co.nz";
   return {
     rules: [
-      {
-        userAgent: '*',
-        disallow: ['/admin', '/api/admin'],
-      },
+      { userAgent: "*", allow: "/" },
+      { userAgent: "*", disallow: ["/api/", "/account/", "/admin/", "/moderation/"] },
     ],
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vendorhub.nz'}/sitemap.xml`,
-  }
+    sitemap: `${base}/sitemap.xml`,
+  };
 }
