@@ -23,6 +23,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.4.0",
+    "@react-email/components": "^1.0.12",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.103.0",
     "@turf/bbox": "^7.3.5",
@@ -33,6 +34,8 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.79.0",
+    "resend": "^6.17.1",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.4.3"
   },

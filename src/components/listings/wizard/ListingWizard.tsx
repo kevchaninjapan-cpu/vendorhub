@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import {
   withdrawListing,
 } from "@/lib/listings/actions";
 import type { ListingDraft } from "@/types/marketplace";
+import { Button } from "@/components/ui/button";
 
 const empty: ListingDraft = {
   pack_tier: "starter",
@@ -36,7 +37,6 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // Returns true on success so callers know whether to advance.
   async function persist(next: Partial<ListingDraft>): Promise<boolean> {
     setBusy(true);
     setErr(null);
@@ -44,12 +44,8 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
       const merged = { ...draft, ...next };
       const { id } = await createOrUpdateDraft(merged);
       setDraft({ ...merged, id });
-      // eslint-disable-next-line no-console
-      console.log("[ListingWizard] persisted draft", { id, merged });
       return true;
     } catch (e: any) {
-      // eslint-disable-next-line no-console
-      console.error("[ListingWizard] persist failed:", e);
       setErr(e?.message ?? "Could not save");
       return false;
     } finally {
@@ -92,7 +88,8 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
 
   function onWithdraw() {
     if (!draft.id) return;
-    if (!confirm("Withdraw this listing? Buyers will no longer see it.")) return;
+    if (!confirm("Withdraw this listing? Buyers will no longer see it."))
+      return;
     setErr(null);
     startWithdraw(async () => {
       try {
@@ -111,23 +108,23 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
 
         <div className="flex items-center gap-2">
           {mode === "edit" && draft.id && (
-            <button
-              type="button"
+            <Button
+              size="sm"
+              variant="destructive"
               onClick={onWithdraw}
-              disabled={withdrawing}
-              className="text-xs text-red-700 underline disabled:opacity-50"
+              loading={withdrawing}
             >
-              {withdrawing ? "Withdrawing…" : "Withdraw listing"}
-            </button>
+              {withdrawing ? "Withdrawing" : "Withdraw listing"}
+            </Button>
           )}
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="secondary"
             onClick={onSaveDraft}
-            disabled={savingDraft}
-            className="rounded-md border px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+            loading={savingDraft}
           >
-            {savingDraft ? "Saving…" : "Save draft"}
-          </button>
+            {savingDraft ? "Saving" : "Save draft"}
+          </Button>
         </div>
       </div>
 
@@ -185,3 +182,4 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
     </div>
   );
 }
+

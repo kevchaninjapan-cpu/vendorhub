@@ -1,6 +1,8 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 import {
   getListingBySlug,
   getListingMedia,
@@ -11,8 +13,9 @@ import PhotoGallery from "./PhotoGallery";
 import EnquiryForm from "./EnquiryForm";
 import SaveButton from "./SaveButton";
 import EvaluationCard from "./EvaluationCard";
+import OfferButton from "./OfferButton";
 
-export const revalidate = 300; // ISR every 5 minutes
+export const revalidate = 300;
 
 type RouteParams = { region: string; suburb: string; slug: string };
 
@@ -54,6 +57,28 @@ export default async function PublicListingPage({
     getListingMedia(listing.id),
     getOpenHomes(listing.id),
   ]);
+
+  // Auth + verification check for OfferButton
+  const cookieStore = await cookies();
+  const supabaseAuth = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  );
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  const isSignedIn = !!user;
+  const isOwnListing = user?.id === listing.member_id;
+
+  let isVerified = false;
+  if (user) {
+    const { data: v } = await supabaseAuth
+      .from("verifications")
+      .select("status")
+      .eq("user_id", user.id)
+      .eq("status", "approved")
+      .maybeSingle();
+    isVerified = !!v;
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -196,10 +221,7 @@ export default async function PublicListingPage({
                 <h2 className="mb-2 text-lg font-semibold">Chattels</h2>
                 <ul className="flex flex-wrap gap-2 text-sm">
                   {listing.chattels.map((c) => (
-                    <li
-                      key={c}
-                      className="rounded bg-muted/30 px-2 py-1 text-xs"
-                    >
+                    <li key={c} className="rounded bg-muted/30 px-2 py-1 text-xs">
                       {c}
                     </li>
                   ))}
@@ -231,6 +253,18 @@ export default async function PublicListingPage({
           </section>
 
           <aside className="space-y-4">
+            <div className="rounded-md border bg-background p-4">
+              <h3 className="text-sm font-semibold">Make an offer</h3>
+              <div className="mt-3">
+                <OfferButton
+                  listing={listing}
+                  isSignedIn={isSignedIn}
+                  isVerified={isVerified}
+                  isOwnListing={isOwnListing}
+                />
+              </div>
+            </div>
+
             <div className="rounded-md border bg-background p-4">
               <h3 className="text-sm font-semibold">Interested?</h3>
               <p className="mt-1 text-xs text-muted-foreground">

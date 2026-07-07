@@ -1,6 +1,7 @@
-// src/app/layout.tsx
+﻿// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "VendorHub",
@@ -14,7 +15,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{ style: { fontSize: "14px" } }}
+        />
+      </body>
     </html>
   );
 }

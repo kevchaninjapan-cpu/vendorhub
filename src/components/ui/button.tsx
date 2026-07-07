@@ -1,48 +1,82 @@
-// components/ui/button.tsx
-import * as React from "react";
-import { cn } from "../../lib/cn";
+"use client";
 
-export type ButtonVariant = "primary" | "outline" | "danger" | "ghost";
-export type ButtonSize = "sm" | "md" | "lg" | "icon";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { cn } from "@/lib/cn";
+import { Spinner } from "./Spinner";
 
-export function Button({
-  variant = "outline",
-  size = "md",
-  className,
-  type,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-}) {
+type Variant = "primary" | "secondary" | "ghost" | "destructive" | "success";
+type Size = "sm" | "md" | "lg";
+
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  fullWidth?: boolean;
+}
+
+export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
+  {
+    variant = "primary",
+    size = "md",
+    loading = false,
+    leftIcon,
+    rightIcon,
+    fullWidth = false,
+    className,
+    children,
+    disabled,
+    type = "button",
+    ...rest
+  },
+  ref
+) {
+  const base =
+    "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
+    "disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98]";
+
+  const sizes: Record<Size, string> = {
+    sm: "h-8 px-3 text-xs",
+    md: "h-10 px-4 text-sm",
+    lg: "h-12 px-6 text-base",
+  };
+
+  const variants: Record<Variant, string> = {
+    primary:
+      "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 " +
+      "focus-visible:ring-emerald-600",
+    secondary:
+      "border border-slate-300 bg-white text-slate-900 shadow-sm " +
+      "hover:bg-slate-50 focus-visible:ring-slate-400",
+    ghost:
+      "text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400",
+    destructive:
+      "bg-red-600 text-white shadow-sm hover:bg-red-700 " +
+      "focus-visible:ring-red-600",
+    success:
+      "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 " +
+      "focus-visible:ring-emerald-600",
+  };
+
   return (
     <button
-      type={type ?? "button"}
+      ref={ref}
+      type={type}
+      disabled={disabled || loading}
       className={cn(
-        // Base
-        "inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium transition",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-        "disabled:pointer-events-none disabled:opacity-50",
-
-        // Sizes
-        size === "sm" && "h-8 px-3 text-xs",
-        size === "md" && "h-9 px-4",
-        size === "lg" && "h-10 px-5",
-        size === "icon" && "h-9 w-9 px-0",
-
-        // Variants
-        variant === "primary" &&
-          "bg-primary text-primary-foreground hover:bg-primary/90",
-        variant === "outline" &&
-          "border border-border bg-background hover:bg-surface",
-        variant === "danger" &&
-          "border border-red-200/60 bg-red-50 text-red-700 hover:bg-red-100",
-        variant === "ghost" &&
-          "bg-transparent text-foreground hover:bg-surface",
-
+        base,
+        sizes[size],
+        variants[variant],
+        fullWidth && "w-full",
         className
       )}
-      {...props}
-    />
+      {...rest}
+    >
+      {loading ? <Spinner size="sm" /> : leftIcon}
+      <span>{children}</span>
+      {!loading && rightIcon}
+    </button>
   );
-}
+});
