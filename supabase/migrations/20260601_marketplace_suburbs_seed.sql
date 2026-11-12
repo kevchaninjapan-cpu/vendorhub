@@ -1,0 +1,2 @@
+-- Superseded by 20261013_regions_suburbs.sql.
+-- Suburbs are loaded from LINZ layer 113764 via script, not seeded here.

@@ -101,7 +101,7 @@ export default function Page() {
 
             <div className="mt-8 flex gap-4">
               <Link
-                href="/onboarding/create"
+                href="/auth/sign-up"
                 className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white"
               >
                 Start Selling Now
@@ -262,7 +262,7 @@ export default function Page() {
             </p>
             <div className="mt-8">
               <Link
-                href="/onboarding/create"
+                href="/auth/sign-up"
                 className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white"
               >
                 Start Now
@@ -441,7 +441,7 @@ export default function Page() {
                         "vh_savings",
                         JSON.stringify({ salePrice, agentFee, savings })
                       );
-                      window.location.href = "/onboarding/create";
+                      window.location.href = "/auth/sign-up";
                     }}
                     className="mt-8 w-full rounded-md bg-white px-6 py-4 text-center font-semibold text-blue-700 hover:bg-white/90"
                   >

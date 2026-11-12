@@ -1,3 +1,4 @@
+import { getUnreadMessageCount } from "@/lib/messages/queries";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import supabaseServer from "@/lib/supabaseServer";
@@ -30,6 +31,9 @@ export default async function MyAccountPage() {
       role: string;
       created_at: string;
     }>();
+
+  // Unread messages across all of this user's conversations.
+  const newEnquiries = await getUnreadMessageCount();
 
   return (
     <AccountShell>
@@ -77,6 +81,31 @@ export default async function MyAccountPage() {
             className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
           >
             Open dashboard →
+          </Link>
+        </div>
+      </section>
+
+      {/* Enquiries */}
+      <section className="mt-4 rounded-2xl border border-border/40 bg-surface p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              Messages
+              {(newEnquiries ?? 0) > 0 && (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">
+                  {newEnquiries} new
+                </span>
+              )}
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+              Conversations with buyers and sellers, including enquiries and viewing requests.
+            </p>
+          </div>
+          <Link
+            href="/account/messages"
+            className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+          >
+            View messages →
           </Link>
         </div>
       </section>

@@ -29,7 +29,7 @@ export default function SignInPage() {
       }
 
       // ✅ Redirect to onboarding router — it will send to correct page
-      window.location.href = "/onboarding";
+      window.location.href = "/account";
     } catch (err: any) {
       setError(err?.message ?? "Unexpected error.");
     } finally {
@@ -112,7 +112,7 @@ export default function SignInPage() {
             <div className="text-center text-sm text-slate-900">
               Don't have an account?{" "}
               <Link
-                href="/onboarding/create"
+                href="/auth/sign-up"
                 className="font-semibold text-blue-600 hover:underline"
               >
                 Create one

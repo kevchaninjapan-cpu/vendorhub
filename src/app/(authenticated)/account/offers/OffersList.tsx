@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { acceptOffer, declineOffer, counterOffer } from "@/lib/offers/actions";
+import { acceptOffer, declineOffer, counterOffer } from "@/lib/offers/client";
 
 type OfferRow = {
   id: string;

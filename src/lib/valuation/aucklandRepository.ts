@@ -63,7 +63,7 @@ export async function getAklRecordByAddress(
 ): Promise<AklRateRecord | null> {
   const norm = normaliseAddress(address);
 
-  // Exact match
+  // Exact match (uses idx_akl_address_norm)
   const { data: exact } = await supabaseAdmin
     .from("nz_akl_rate_assessment")
     .select("*")
@@ -72,7 +72,7 @@ export async function getAklRecordByAddress(
 
   if (exact) return exact as AklRateRecord;
 
-  // Fuzzy match
+  // Fuzzy match (uses idx_akl_address_norm_trgm)
   const words = norm.split(" ").filter((w) => w.length >= 1);
   if (words.length === 0) return null;
 
@@ -89,37 +89,26 @@ export async function getAklRecordByAddress(
 }
 
 /**
- * Get median CV for ALL properties in a suburb
- * (broader context than comparable properties).
+ * Median CV for ALL properties in a suburb, calculated in the database.
+ * Uses idx_akl_suburb, so it's an exact, indexed lookup.
  */
 export async function getAklSuburbMedian(
   suburb: string | null,
 ): Promise<number | null> {
   if (!suburb) return null;
 
-  const { data } = await supabaseAdmin
-    .from("nz_akl_rate_assessment")
-    .select("cv")
-    .ilike("formatted_address", `%\r${suburb}\r%`)
-    .not("cv", "is", null)
-    .limit(2000);
+  const { data, error } = await supabaseAdmin.rpc("akl_suburb_median", {
+    p_suburb: suburb,
+  });
 
-  if (!data || data.length === 0) return null;
-
-  const values = data
-    .map((d) => d.cv as number)
-    .filter((v) => v > 0)
-    .sort((a, b) => a - b);
-
-  if (values.length === 0) return null;
-  const mid = Math.floor(values.length / 2);
-  return values.length % 2 === 0
-    ? Math.round((values[mid - 1] + values[mid]) / 2)
-    : values[mid];
+  if (error || data == null) return null;
+  return Number(data);
 }
 
 /**
  * Find comparable Auckland properties.
+ * Same suburb first (indexed via akl_comparables), then falls back to
+ * same land use across Auckland if the suburb has too few matches.
  */
 export async function findAklComparables(
   subject: AklRateRecord,
@@ -131,47 +120,40 @@ export async function findAklComparables(
   const cvMin = subjCv ? Math.round(subjCv * 0.5) : null;
   const cvMax = subjCv ? Math.round(subjCv * 1.5) : null;
 
-  let q = supabaseAdmin
+  // Same-suburb comparables (indexed)
+  let suburbRows: AklRateRecord[] = [];
+  if (suburb) {
+    const { data, error } = await supabaseAdmin.rpc("akl_comparables", {
+      p_exclude_key: subject.rate_account_key,
+      p_suburb: suburb,
+      p_land_use: subject.land_use_description,
+      p_cv_min: cvMin,
+      p_cv_max: cvMax,
+      p_limit: limit,
+    });
+    if (error) throw new Error(`findAklComparables error: ${error.message}`);
+    suburbRows = (data as AklRateRecord[]) ?? [];
+  }
+
+  if (suburbRows.length >= 10 || !subject.land_use_description) {
+    return suburbRows;
+  }
+
+  // Fallback: relax suburb if too few results
+  let fb = supabaseAdmin
     .from("nz_akl_rate_assessment")
     .select("*")
     .not("cv", "is", null)
     .neq("rate_account_key", subject.rate_account_key)
+    .eq("land_use_description", subject.land_use_description)
     .limit(limit);
 
-  if (subject.land_use_description) {
-    q = q.eq("land_use_description", subject.land_use_description);
-  }
+  if (cvMin && cvMax) fb = fb.gte("cv", cvMin).lte("cv", cvMax);
 
-  if (suburb) {
-    q = q.ilike("formatted_address", `%\r${suburb}\r%`);
-  }
+  const { data: fbData, error: fbErr } = await fb;
+  if (fbErr) throw new Error(`findAklComparables fallback error: ${fbErr.message}`);
 
-  if (cvMin && cvMax) {
-    q = q.gte("cv", cvMin).lte("cv", cvMax);
-  }
-
-  const { data, error } = await q;
-  if (error) throw new Error(`findAklComparables error: ${error.message}`);
-
-  // Fallback: relax suburb if too few results
-  if ((data?.length ?? 0) < 10 && subject.land_use_description) {
-    let fb = supabaseAdmin
-      .from("nz_akl_rate_assessment")
-      .select("*")
-      .not("cv", "is", null)
-      .neq("rate_account_key", subject.rate_account_key)
-      .eq("land_use_description", subject.land_use_description)
-      .limit(limit);
-
-    if (cvMin && cvMax) fb = fb.gte("cv", cvMin).lte("cv", cvMax);
-
-    const { data: fbData, error: fbErr } = await fb;
-    if (fbErr) throw new Error(`findAklComparables fallback error: ${fbErr.message}`);
-
-    return (fbData as AklRateRecord[]) ?? [];
-  }
-
-  return (data as AklRateRecord[]) ?? [];
+  return (fbData as AklRateRecord[]) ?? [];
 }
 
 /**

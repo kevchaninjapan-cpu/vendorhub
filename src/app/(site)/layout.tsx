@@ -51,7 +51,7 @@ export default function SiteLayout({
       </Link>
 
       <Link
-        href="/onboarding/create"
+        href="/auth/sign-up"
         className="rounded-md border border-slate-900 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition"
       >
         Create an Account

@@ -1,0 +1,26 @@
+MANUAL STEP - add the documents section to the public listing page
+=================================================================
+
+File: src\app\listings\[region]\[suburb]\[slug]\page.tsx
+
+1) Add this import with the other imports at the top:
+
+import ListingDocuments from "@/components/listings/documents/ListingDocuments";
+
+2) Add this line where the documents should appear, for example just
+   below the property description:
+
+<ListingDocuments listingId={listing.id} />
+
+If the listing variable in that file has a different name, use that
+name instead of "listing".
+
+OPTIONAL - link sellers to the new page
+=======================================
+
+On the My Listings dashboard, next to each listing's Edit link, add a
+link to:
+
+/account/listings/<listing id>/documents
+
+labelled "Documents".

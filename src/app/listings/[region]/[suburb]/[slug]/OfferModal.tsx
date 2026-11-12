@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { submitOffer } from "@/lib/offers/actions";
+import { submitOffer } from "@/lib/offers/client";
 import type { PublicListing } from "@/types/marketplace-public";
 
 export default function OfferModal({

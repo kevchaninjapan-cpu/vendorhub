@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -14,6 +14,9 @@ import EnquiryForm from "./EnquiryForm";
 import SaveButton from "./SaveButton";
 import EvaluationCard from "./EvaluationCard";
 import OfferButton from "./OfferButton";
+import ListingDocuments from "@/components/listings/documents/ListingDocuments";
+import ListingViewings from "@/components/listings/viewings/ListingViewings";
+import ListingViewingRequest from "@/components/listings/viewings/ListingViewingRequest";
 
 export const revalidate = 300;
 
@@ -203,6 +206,7 @@ export default async function PublicListingPage({
                 {listing.description ?? "No description provided."}
               </p>
             </section>
+            <ListingDocuments listingId={listing.id} />
 
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Fact label="Type" value={listing.property_type ?? "—"} />
@@ -229,25 +233,8 @@ export default async function PublicListingPage({
               </section>
             )}
 
-            {!!openHomes.length && (
-              <section>
-                <h2 className="mb-2 text-lg font-semibold">Open homes</h2>
-                <ul className="space-y-1 text-sm">
-                  {openHomes.map((o) => (
-                    <li key={o.id}>
-                      {new Date(o.starts_at).toLocaleString("en-NZ", {
-                        dateStyle: "full",
-                        timeStyle: "short",
-                      })}{" "}
-                      –{" "}
-                      {new Date(o.ends_at).toLocaleTimeString("en-NZ", {
-                        timeStyle: "short",
-                      })}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <ListingViewings listingId={listing.id} />
+            <ListingViewingRequest listingId={listing.id} />
 
             <EvaluationCard listing={listing} />
           </section>
