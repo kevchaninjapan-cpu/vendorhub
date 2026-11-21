@@ -190,6 +190,19 @@ export default async function MyAccountPage() {
         </div>
       </section>
 
+      <section className="mt-4 rounded-2xl border border-border/40 bg-surface p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">Saved homes</h2>
+            <p className="mt-1 text-xs text-muted">
+              {saved === 0 ? "Homes you save will appear here." : `${saved} saved home${saved === 1 ? "" : "s"}.`}
+            </p>
+          </div>
+          <Link href="/account/saved" className="rounded-md border px-3 py-1.5 text-xs font-semibold">
+            View saved &rarr;
+          </Link>
+        </div>
+      </section>
       <div className="mt-6">
         <SignOutButton />
       </div>

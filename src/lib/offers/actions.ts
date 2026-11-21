@@ -4,22 +4,19 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { ZodError } from "zod";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/client";
 import OfferReceived from "@/lib/email/templates/offer-received";
 import OfferAccepted from "@/lib/email/templates/offer-accepted";
 import OfferDeclined from "@/lib/email/templates/offer-declined";
 import OfferCountered from "@/lib/email/templates/offer-countered";
-import { competingBuyerIds, notifyAutoDeclined } from "@/lib/email/notify";
 import type { ActionResult } from "@/lib/documents/schema";
+import { emailUser, listingInfo, notifyAutoDeclined } from "@/lib/email/notify";
 import { offerFormSchema, type OfferForm } from "./schema";
 
-// Every action RETURNS its result rather than throwing. Next.js hides the
-// message of errors thrown from server actions in production, so a thrown
-// "Your offer must be at least NZ$..." would reach the buyer as a generic
-// failure. Screens import from ./client, which unwraps these results.
-
-// ---- Supabase (cookie-scoped, respects RLS) --------------------------------
+// Every action RETURNS { ok, error } instead of throwing, so the message
+// reaches the user in production. Screens import from ./client, which
+// unwraps these results. Turn rules are enforced in the database.
 
 async function getSupabase() {
   const cookieStore = await cookies();
@@ -41,7 +38,6 @@ async function getSupabase() {
   );
 }
 
-// No redirect() here: a redirect thrown inside run() would be swallowed.
 async function requireUser() {
   const supabase = await getSupabase();
   const {
@@ -51,12 +47,10 @@ async function requireUser() {
   return { supabase, user };
 }
 
-// ---- Error messages --------------------------------------------------------
-
 function humaniseError(msg: string): string {
-  if (msg.startsWith("OFFER_BELOW_MIN_PRICE:")) {
-    const min = Number(msg.split(":")[1]);
-    return `Your offer must be at least NZ$${min.toLocaleString("en-NZ")} (75% of the asking price).`;
+  if (msg.includes("OFFER_BELOW_MIN_PRICE:")) {
+    const min = Number(msg.split("OFFER_BELOW_MIN_PRICE:")[1]);
+    return `Offers must be at least NZ$${min.toLocaleString("en-NZ")} (75% of the asking price).`;
   }
   const map: Record<string, string> = {
     AUTH_REQUIRED: "Please sign in first.",
@@ -65,11 +59,14 @@ function humaniseError(msg: string): string {
     LISTING_NOT_ACCEPTING_OFFERS: "This listing isn't accepting offers.",
     CANNOT_OFFER_ON_OWN_LISTING: "You can't offer on your own listing.",
     OFFER_NOT_FOUND: "This offer no longer exists.",
-    OFFER_NOT_ACTIVE: "This offer is no longer active.",
-    NOT_SELLER: "Only the seller can accept.",
+    OFFER_NOT_ACTIVE: "This offer has already been replaced or closed. Refresh to see the latest.",
+    OFFER_EXPIRED: "This offer has expired.",
+    NOT_YOUR_TURN: "You're waiting on the other party to respond to this offer.",
     NOT_PARTICIPANT: "You aren't part of this offer.",
+    AMOUNT_INVALID: "Please enter a valid amount.",
   };
-  return map[msg] ?? msg;
+  for (const key of Object.keys(map)) if (msg.includes(key)) return map[key];
+  return msg;
 }
 
 async function run<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
@@ -83,45 +80,22 @@ async function run<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
   }
 }
 
-// ---- Recipient lookup ------------------------------------------------------
-// Service-role client: RLS on profiles limits each user to their own row, so
-// neither party can read the other's email with the cookie-scoped client.
-// There is no FK between listings and profiles, so separate queries are used.
+type OfferSummary = { listing_id: string; buyer_id: string; amount: number; proposed_by: "buyer" | "seller" };
 
-type Party = { email: string | null; name: string | null };
-
-async function getProfile(userId: string): Promise<Party> {
-  const { data } = await supabaseAdmin()
-    .from("profiles")
-    .select("email, full_name")
-    .eq("id", userId)
-    .maybeSingle<{ email: string | null; full_name: string | null }>();
-  return { email: data?.email ?? null, name: data?.full_name ?? null };
-}
-
-async function getListingSummary(listingId: string) {
-  const { data } = await supabaseAdmin()
-    .from("listings")
-    .select("member_id, headline, formatted_address")
-    .eq("id", listingId)
-    .maybeSingle<{ member_id: string; headline: string | null; formatted_address: string | null }>();
-  if (!data) return null;
-  return {
-    sellerId: data.member_id,
-    title: data.headline ?? data.formatted_address ?? "the listing",
-  };
-}
-
-async function getOfferSummary(offerId: string) {
-  const { data } = await supabaseAdmin()
+async function getOffer(offerId: string): Promise<OfferSummary | null> {
+  const { data } = await supabaseAdmin
     .from("offers")
-    .select("listing_id, buyer_id, amount")
+    .select("listing_id, buyer_id, amount, proposed_by")
     .eq("id", offerId)
-    .maybeSingle<{ listing_id: string; buyer_id: string; amount: number }>();
-  return data ?? null;
+    .maybeSingle();
+  return (data ?? null) as OfferSummary | null;
 }
 
-// Never let an email failure undo a completed offer transaction.
+async function getProfile(userId: string) {
+  const { data } = await supabaseAdmin.from("profiles").select("email, full_name").eq("id", userId).maybeSingle();
+  return (data ?? null) as { email: string | null; full_name: string | null } | null;
+}
+
 async function safeSend(fn: () => Promise<unknown>, label: string) {
   try {
     await fn();
@@ -130,12 +104,10 @@ async function safeSend(fn: () => Promise<unknown>, label: string) {
   }
 }
 
-// ---- Submit ----------------------------------------------------------------
+const money = (n: number) => "NZ$" + Number(n).toLocaleString("en-NZ");
 
-export async function submitOffer(
-  listingId: string,
-  input: OfferForm
-): Promise<ActionResult<{ id: string }>> {
+// ---- Submit ------------------------------------------------------------------
+export async function submitOffer(listingId: string, input: OfferForm): Promise<ActionResult<{ id: string }>> {
   return run(async () => {
     const validated = offerFormSchema.parse(input);
     const { supabase, user } = await requireUser();
@@ -153,22 +125,21 @@ export async function submitOffer(
       p_settlement_date: validated.settlement_date || null,
       p_notes: validated.notes ?? null,
     });
-
     if (error) throw new Error(error.message);
 
     await safeSend(async () => {
-      const listing = await getListingSummary(listingId);
-      if (!listing) return;
-      const seller = await getProfile(listing.sellerId);
-      if (!seller.email) return;
+      const info = await listingInfo(listingId);
+      if (!info) return;
+      const seller = await getProfile(info.sellerId);
+      if (!seller?.email) return;
       const buyer = await getProfile(user.id);
       await sendEmail({
         to: seller.email,
-        subject: `New offer on ${listing.title}`,
+        subject: `New offer on ${info.title}`,
         react: OfferReceived({
           amount: validated.amount,
-          listingTitle: listing.title,
-          buyerName: buyer.name ?? "A verified buyer",
+          listingTitle: info.title,
+          buyerName: buyer?.full_name ?? "A verified buyer",
         }),
       });
     }, "offer.received");
@@ -178,8 +149,7 @@ export async function submitOffer(
   });
 }
 
-// ---- Counter ---------------------------------------------------------------
-
+// ---- Counter -----------------------------------------------------------------
 export async function counterOffer(
   offerId: string,
   amount: number,
@@ -187,86 +157,105 @@ export async function counterOffer(
 ): Promise<ActionResult<{ id: string }>> {
   return run(async () => {
     const { supabase, user } = await requireUser();
-
-    // Read before the RPC - status changes once it runs.
-    const original = await getOfferSummary(offerId);
+    const original = await getOffer(offerId);
 
     const { data, error } = await supabase.rpc("counter_offer", {
       p_offer_id: offerId,
       p_amount: amount,
       p_notes: notes ?? null,
     });
-
     if (error) throw new Error(error.message);
 
-    await safeSend(async () => {
-      if (!original) return;
-      const listing = await getListingSummary(original.listing_id);
-      if (!listing) return;
-
-      // Whoever did not send the counter receives the email.
-      const senderIsBuyer = user.id === original.buyer_id;
-      const recipientId = senderIsBuyer ? listing.sellerId : original.buyer_id;
-      const recipient = await getProfile(recipientId);
-      if (!recipient.email) return;
-
-      await sendEmail({
-        to: recipient.email,
-        subject: `Counter-offer on ${listing.title}`,
-        react: OfferCountered({
-          originalAmount: original.amount,
-          counterAmount: amount,
-          listingTitle: listing.title,
-          fromParty: senderIsBuyer ? "buyer" : "seller",
-        }),
-      });
-    }, "offer.countered");
+    if (original) {
+      await safeSend(async () => {
+        const info = await listingInfo(original.listing_id);
+        if (!info) return;
+        const senderIsBuyer = user.id === original.buyer_id;
+        const recipient = await getProfile(senderIsBuyer ? info.sellerId : original.buyer_id);
+        if (!recipient?.email) return;
+        await sendEmail({
+          to: recipient.email,
+          subject: `Counter-offer on ${info.title}`,
+          react: OfferCountered({
+            originalAmount: original.amount,
+            counterAmount: amount,
+            listingTitle: info.title,
+            fromParty: senderIsBuyer ? "buyer" : "seller",
+          }),
+        });
+      }, "offer.countered");
+    }
 
     revalidatePath("/account/offers");
     return { id: data as string };
   });
 }
 
-// ---- Accept ----------------------------------------------------------------
-
+// ---- Accept ------------------------------------------------------------------
 export async function acceptOffer(offerId: string): Promise<ActionResult<{ id: string }>> {
   return run(async () => {
-    const { supabase } = await requireUser();
-    const offer = await getOfferSummary(offerId);
-    const competingBuyers = offer ? await competingBuyerIds(offer.listing_id, offerId, offer.buyer_id) : [];
+    const { supabase, user } = await requireUser();
+    const offer = await getOffer(offerId);
+
+    // Buyers in other negotiations on this listing, found before the database
+    // declines their latest offers.
+    let competing: string[] = [];
+    if (offer) {
+      const { data } = await supabaseAdmin
+        .from("offers")
+        .select("buyer_id")
+        .eq("listing_id", offer.listing_id)
+        .eq("status", "submitted")
+        .neq("id", offerId);
+      competing = Array.from(new Set(((data ?? []) as { buyer_id: string }[]).map((r) => r.buyer_id))).filter(
+        (id) => id !== offer.buyer_id
+      );
+    }
 
     const { error } = await supabase.rpc("accept_offer", { p_offer_id: offerId });
     if (error) throw new Error(error.message);
 
-    await safeSend(async () => {
-      if (!offer) return;
-      const listing = await getListingSummary(offer.listing_id);
-      if (!listing) return;
-      const buyer = await getProfile(offer.buyer_id);
-      if (!buyer.email) return;
-      await sendEmail({
-        to: buyer.email,
-        subject: "Your offer was accepted",
-        react: OfferAccepted({ amount: offer.amount, listingTitle: listing.title }),
-      });
-    }, "offer.accepted");
-
-    if (offer) await notifyAutoDeclined(competingBuyers, offer.listing_id);
+    if (offer) {
+      const info = await listingInfo(offer.listing_id);
+      if (info) {
+        if (user.id === offer.buyer_id) {
+          await emailUser({
+            userId: info.sellerId,
+            subject: `Your counter-offer was accepted - ${info.title}`,
+            heading: "The buyer accepted your counter-offer",
+            lines: [
+              `The buyer has accepted ${money(offer.amount)} for ${info.title}.`,
+              "Next step: arrange the sale and purchase agreement with your lawyer or conveyancer.",
+            ],
+            buttonLabel: "View offers",
+            path: "/account/offers",
+            label: "offer.accepted_by_buyer",
+          });
+        } else {
+          await safeSend(async () => {
+            const buyer = await getProfile(offer.buyer_id);
+            if (!buyer?.email) return;
+            await sendEmail({
+              to: buyer.email,
+              subject: "Your offer was accepted",
+              react: OfferAccepted({ amount: offer.amount, listingTitle: info.title }),
+            });
+          }, "offer.accepted");
+        }
+      }
+      await notifyAutoDeclined(competing, offer.listing_id);
+    }
 
     revalidatePath("/account/offers");
     return { id: offerId };
   });
 }
 
-// ---- Decline / withdraw ----------------------------------------------------
-
-export async function declineOffer(
-  offerId: string,
-  reason?: string
-): Promise<ActionResult<{ id: string }>> {
+// ---- Decline / withdraw ------------------------------------------------------
+export async function declineOffer(offerId: string, reason?: string): Promise<ActionResult<{ id: string }>> {
   return run(async () => {
     const { supabase, user } = await requireUser();
-    const offer = await getOfferSummary(offerId);
+    const offer = await getOffer(offerId);
 
     const { error } = await supabase.rpc("decline_offer", {
       p_offer_id: offerId,
@@ -274,25 +263,52 @@ export async function declineOffer(
     });
     if (error) throw new Error(error.message);
 
-    await safeSend(async () => {
-      if (!offer) return;
-      // This action also backs the buyer's Withdraw button - don't email a
-      // buyer about their own withdrawal.
-      if (user.id === offer.buyer_id) return;
-      const listing = await getListingSummary(offer.listing_id);
-      if (!listing) return;
-      const buyer = await getProfile(offer.buyer_id);
-      if (!buyer.email) return;
-      await sendEmail({
-        to: buyer.email,
-        subject: `Update on your offer - ${listing.title}`,
-        react: OfferDeclined({
-          amount: offer.amount,
-          listingTitle: listing.title,
-          reason: reason?.trim() || undefined,
-        }),
-      });
-    }, "offer.declined");
+    if (offer) {
+      const info = await listingInfo(offer.listing_id);
+      const myRole = user.id === offer.buyer_id ? "buyer" : "seller";
+      const withdrew = offer.proposed_by === myRole;
+      const why = reason?.trim() || undefined;
+
+      if (info) {
+        if (withdrew) {
+          await emailUser({
+            userId: myRole === "buyer" ? info.sellerId : offer.buyer_id,
+            subject: `Offer withdrawn - ${info.title}`,
+            heading: myRole === "buyer" ? "A buyer withdrew their offer" : "The seller withdrew their counter-offer",
+            lines: [
+              `The ${money(offer.amount)} ${myRole === "buyer" ? "offer" : "counter-offer"} on ${info.title} has been withdrawn.`,
+              why ? `Reason: ${why}` : "",
+            ],
+            buttonLabel: "View offers",
+            path: "/account/offers",
+            label: "offer.withdrawn",
+          });
+        } else if (myRole === "seller") {
+          await safeSend(async () => {
+            const buyer = await getProfile(offer.buyer_id);
+            if (!buyer?.email) return;
+            await sendEmail({
+              to: buyer.email,
+              subject: `Update on your offer - ${info.title}`,
+              react: OfferDeclined({ amount: offer.amount, listingTitle: info.title, reason: why }),
+            });
+          }, "offer.declined");
+        } else {
+          await emailUser({
+            userId: info.sellerId,
+            subject: `Counter-offer declined - ${info.title}`,
+            heading: "The buyer declined your counter-offer",
+            lines: [
+              `The buyer declined your ${money(offer.amount)} counter-offer on ${info.title}.`,
+              why ? `Reason: ${why}` : "",
+            ],
+            buttonLabel: "View offers",
+            path: "/account/offers",
+            label: "offer.counter_declined",
+          });
+        }
+      }
+    }
 
     revalidatePath("/account/offers");
     return { id: offerId };
