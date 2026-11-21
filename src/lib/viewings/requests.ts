@@ -490,13 +490,18 @@ export async function markConversationRead(conversationId: string): Promise<Acti
 export async function getBuyerRequestState(listingId: string): Promise<BuyerRequestState> {
   const supabase = await getSupabase();
 
-  const { data: listingRow } = await supabase
+  // Buyers can no longer read listings directly (anti-cloning phase 2b), so
+  // this one setting is read with the server-only key. Only this column is
+  // read, and only for live listings. Anything else counts as "not accepting".
+  const { data: listingRow } = await supabaseAdmin()
     .from("listings")
     .select("accepts_viewing_requests")
     .eq("id", listingId)
+    .in("status", ["live", "under_offer"])
     .maybeSingle();
   const accepts =
-    (listingRow as { accepts_viewing_requests?: boolean | null } | null)?.accepts_viewing_requests !== false;
+    listingRow != null &&
+    (listingRow as { accepts_viewing_requests?: boolean | null }).accepts_viewing_requests !== false;
 
   const {
     data: { user },

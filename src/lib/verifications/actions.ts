@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { emailUser } from "@/lib/email/notify";
 import { verificationFormSchema, type VerificationForm } from "./schema";
 
 async function getSupabase() {
@@ -62,6 +64,46 @@ export async function reviewVerification(
     p_reason: reason,
   });
   if (error) throw new Error(error.message);
+
+  // Tell the person who submitted it. The review function has already
+  // checked the reviewer is staff.
+  const { data: row } = await supabaseAdmin
+    .from("verifications")
+    .select("user_id")
+    .eq("id", verificationId)
+    .maybeSingle();
+  const userId = (row as { user_id: string } | null)?.user_id;
+
+  if (userId) {
+    if (approved) {
+      await emailUser({
+        userId,
+        subject: "You're verified on VendorHub",
+        heading: "Your identity has been verified",
+        lines: [
+          "Thanks for verifying your identity. You can now make offers and download property documents such as LIM reports.",
+        ],
+        buttonLabel: "Browse homes",
+        path: "/buy",
+        label: "verification.approved",
+      });
+    } else {
+      await emailUser({
+        userId,
+        subject: "We couldn't verify your identity",
+        heading: "We couldn't verify your identity",
+        lines: [
+          "We weren't able to approve your identity check.",
+          reason?.trim() ? `Reason: ${reason.trim()}` : "",
+          "You can submit new documents at any time.",
+        ],
+        buttonLabel: "Try again",
+        path: "/account/verify",
+        label: "verification.rejected",
+      });
+    }
+  }
+
   revalidatePath("/verifications/queue");
   return { ok: true };
 }

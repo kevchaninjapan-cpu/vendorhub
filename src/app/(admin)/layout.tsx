@@ -25,7 +25,7 @@ export default async function AdminLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/signin");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -46,6 +46,15 @@ export default async function AdminLayout({
               VendorHub
             </Link>
             <nav className="flex gap-4 text-sm">
+              <Link href="/admin" className="text-muted-foreground hover:text-foreground">
+                Dashboard
+              </Link>
+              <Link href="/admin/funnels" className="text-muted-foreground hover:text-foreground">
+                Funnels
+              </Link>
+              <Link href="/verifications/queue" className="text-muted-foreground hover:text-foreground">
+                Verifications
+              </Link>
               <Link
                 href="/moderation/queue"
                 className="text-muted-foreground hover:text-foreground"

@@ -1,8 +1,11 @@
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 import { resolveAddress } from "@/lib/valuation/repository";
 import { geocodeAddress } from "@/lib/valuation/geocode";
 
 export async function GET(req: Request) {
+  const __vhLimited = await rateLimitResponse("valuation-resolve");
+  if (__vhLimited) return __vhLimited;
   const url = new URL(req.url);
   const address = url.searchParams.get("address") ?? "";
 

@@ -54,9 +54,14 @@ export default async function ListingViewingsPage({ params }: Props) {
         <Link href="/account/listings" className="text-slate-500 hover:text-slate-800">
           &larr; Back to my listings
         </Link>
-        <Link href={`/account/listings/${id}/documents`} className="text-slate-500 hover:text-slate-800">
-          Documents &rarr;
-        </Link>
+        <span className="flex gap-4">
+          <Link href={`/account/listings/${id}/insights`} className="text-slate-500 hover:text-slate-800">
+            Insights
+          </Link>
+          <Link href={`/account/listings/${id}/documents`} className="text-slate-500 hover:text-slate-800">
+            Documents &rarr;
+          </Link>
+        </span>
       </div>
 
       <h1 className="mt-3 text-2xl font-semibold text-slate-900">Open homes &amp; viewings</h1>

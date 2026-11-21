@@ -153,6 +153,14 @@ export default async function MyListingsPage({
                     >
                       {["draft", "rejected"].includes(l.status) ? "Edit" : "View"}
                     </Link>
+                    {["live", "under_offer", "sold", "withdrawn"].includes(l.status) && (
+                      <Link
+                        href={`/account/listings/${l.id}/insights`}
+                        className="ml-3 text-sm underline"
+                      >
+                        Insights
+                      </Link>
+                    )}
                   </Td>
                 </tr>
               ))}

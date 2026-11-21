@@ -19,13 +19,13 @@ export async function requireAuth() {
 }
 
 /**
- * Require an authenticated admin user.
+ * Require an authenticated admin user (profiles.role = 'admin').
  * Returns the user if authorised.
  */
 export async function requireAdminAuth() {
   const user = await requireAuth();
 
-  if (!isAdminUser(user)) {
+  if (!(await isAdminUser(user))) {
     throw new Error("Forbidden");
   }
 

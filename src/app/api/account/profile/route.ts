@@ -15,7 +15,6 @@ type ProfileUpdate = {
 
 const ALLOWED_KEYS: (keyof ProfileUpdate)[] = [
   "full_name",
-  "email",
   "phone",
   "address_line1",
   "address_line2",
@@ -159,8 +158,8 @@ export async function PATCH(req: NextRequest) {
       .upsert(
         {
           id: user.id,
-          email: user.email,
           ...update,
+          email: user.email,
         },
         { onConflict: "id" }
       );

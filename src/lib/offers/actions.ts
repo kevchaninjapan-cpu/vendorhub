@@ -10,6 +10,7 @@ import OfferReceived from "@/lib/email/templates/offer-received";
 import OfferAccepted from "@/lib/email/templates/offer-accepted";
 import OfferDeclined from "@/lib/email/templates/offer-declined";
 import OfferCountered from "@/lib/email/templates/offer-countered";
+import { competingBuyerIds, notifyAutoDeclined } from "@/lib/email/notify";
 import type { ActionResult } from "@/lib/documents/schema";
 import { offerFormSchema, type OfferForm } from "./schema";
 
@@ -232,6 +233,7 @@ export async function acceptOffer(offerId: string): Promise<ActionResult<{ id: s
   return run(async () => {
     const { supabase } = await requireUser();
     const offer = await getOfferSummary(offerId);
+    const competingBuyers = offer ? await competingBuyerIds(offer.listing_id, offerId, offer.buyer_id) : [];
 
     const { error } = await supabase.rpc("accept_offer", { p_offer_id: offerId });
     if (error) throw new Error(error.message);
@@ -248,6 +250,8 @@ export async function acceptOffer(offerId: string): Promise<ActionResult<{ id: s
         react: OfferAccepted({ amount: offer.amount, listingTitle: listing.title }),
       });
     }, "offer.accepted");
+
+    if (offer) await notifyAutoDeclined(competingBuyers, offer.listing_id);
 
     revalidatePath("/account/offers");
     return { id: offerId };

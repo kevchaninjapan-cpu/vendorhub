@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const revalidate = 3600;
 
@@ -11,31 +11,22 @@ type ListingRow = {
   updated_at: string;
 };
 
-type SuburbRow = {
-  id: string;
-  slug: string;
-  region_slug: string | null;
-};
+type SuburbRow = { id: string; slug: string; region_slug: string | null };
 
 const toSlug = (s: string) => s.toLowerCase().trim().replace(/\s+/g, "-");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false } }
-  );
-
+  // Server-only key; every query filters to live listings itself.
+  const db = supabaseAdmin;
   const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://vendorhub.co.nz").replace(/\/$/, "");
 
-  const { data: listingData } = await supabase
+  const { data: listingData } = await db
     .from("listings")
     .select("slug, region, suburb, suburb_id, updated_at")
     .in("status", ["live", "under_offer"]);
 
   const listings = (listingData ?? []) as ListingRow[];
 
-  // Newest listing date per suburb, used as that suburb page's lastModified.
   const latestBySuburb = new Map<string, Date>();
   for (const l of listings) {
     if (!l.suburb_id) continue;
@@ -44,15 +35,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (!prev || d > prev) latestBySuburb.set(l.suburb_id, d);
   }
 
-  // Only suburbs with something for sale. Listing all ~4,500 LINZ suburbs
-  // would publish thousands of empty pages, which search engines penalise.
+  // Only suburbs with something for sale.
   let suburbs: SuburbRow[] = [];
   const suburbIds = Array.from(latestBySuburb.keys());
   if (suburbIds.length > 0) {
-    const { data } = await supabase
-      .from("suburbs")
-      .select("id, slug, region_slug")
-      .in("id", suburbIds);
+    const { data } = await db.from("suburbs").select("id, slug, region_slug").in("id", suburbIds);
     suburbs = (data ?? []) as SuburbRow[];
   }
 
@@ -85,6 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: `${base}/buy`, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.1 },
     ...regionUrls,
     ...suburbUrls,
     ...listingUrls,

@@ -174,6 +174,7 @@ export default function ValuationSearch() {
         body: JSON.stringify(body),
       });
 
+      if (res.status === 429) { const j = await res.json().catch(() => ({})); setError(j.error ?? "You've reached today's limit of free estimates. Sign in for more, or try again tomorrow."); return; }
       if (!res.ok) throw new Error("Valuation failed");
       const data: ValuationApiResponse = await res.json();
 
@@ -208,6 +209,7 @@ export default function ValuationSearch() {
         }),
       });
 
+      if (res.status === 429) { const j = await res.json().catch(() => ({})); setError(j.error ?? "You've reached today's limit of free estimates. Sign in for more, or try again tomorrow."); return; }
       if (!res.ok) throw new Error("Valuation failed");
       const data: ValuationApiResponse = await res.json();
 

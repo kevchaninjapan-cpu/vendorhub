@@ -1,6 +1,7 @@
 // app/(site)/layout.tsx
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
+import SiteFooter from "@/components/SiteFooter";
 
 export default function SiteLayout({
   children,
@@ -62,35 +63,13 @@ export default function SiteLayout({
   {/* subtle divider */}
   <div className="h-px bg-slate-200/60" />
 </header>
-``
 
       {/* ===================== */}
       {/* PAGE CONTENT */}
       {/* ===================== */}
       {children}
 
-      {/* ===================== */}
-      {/* FOOTER (quiet, optional) */}
-      {/* ===================== */}
-      <footer className="mt-32 border-t border-slate-200/60">
-        <div className="mx-auto max-w-7xl px-6 py-12 text-sm text-slate-900">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>© {new Date().getFullYear()} VendorHub</div>
-
-            <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-slate-700">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-slate-700">
-                Terms
-              </Link>
-              <Link href="/contact" className="hover:text-slate-700">
-                Contact
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

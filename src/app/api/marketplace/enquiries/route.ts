@@ -1,3 +1,4 @@
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
@@ -16,6 +17,8 @@ const ERRORS: Record<string, [string, number]> = {
 };
 
 export async function POST(req: Request) {
+  const __vhLimited = await rateLimitResponse("enquiries");
+  if (__vhLimited) return __vhLimited;
   const body = await req.json().catch(() => null);
   const listingId = typeof body?.listingId === "string" ? body.listingId : "";
   const message = typeof body?.message === "string" ? body.message.trim() : "";

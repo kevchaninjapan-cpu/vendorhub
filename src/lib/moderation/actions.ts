@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { emailUser, listingInfo } from "@/lib/email/notify";
 
 async function getSupabase() {
   const cookieStore = await cookies();
@@ -27,7 +28,7 @@ async function getSupabase() {
 async function requireAdmin() {
   const supabase = await getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/signin");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -45,17 +46,12 @@ async function requireAdmin() {
 export async function approveListing(listingId: string, notes?: string) {
   const { supabase } = await requireAdmin();
 
-  // Pull the valuation snapshot (if you have it) before going live
   const { data: listing } = await supabase
     .from("listings")
     .select("id, dvr_record_id, auckland_rate_assessment_id, valuation_estimate")
     .eq("id", listingId)
     .single();
   if (!listing) throw new Error("Listing not found");
-
-  // (Optional) Freeze a fresh valuation snapshot at publish time.
-  // If you already store valuation_estimate, leave as-is. Otherwise call your
-  // estimate API here and update the snapshot fields.
 
   const { error } = await supabase
     .from("listings")
@@ -70,6 +66,22 @@ export async function approveListing(listingId: string, notes?: string) {
 
   // Refresh the search materialised view so the listing shows up immediately
   await supabase.rpc("refresh_listings_search");
+
+  const info = await listingInfo(listingId);
+  if (info) {
+    await emailUser({
+      userId: info.sellerId,
+      subject: `Your listing is live - ${info.title}`,
+      heading: "Your listing is live",
+      lines: [
+        `${info.title} has been approved and buyers can now find it on VendorHub.`,
+        "Next steps: add open home times, and upload a LIM and record of title to earn the Ready to buy badge.",
+      ],
+      buttonLabel: "View your listing",
+      path: info.publicPath,
+      label: "listing.approved",
+    });
+  }
 
   revalidatePath("/(admin)/moderation/queue");
   revalidatePath("/account/listings");
@@ -93,6 +105,23 @@ export async function rejectListing(listingId: string, reason: string) {
     .eq("id", listingId);
 
   if (error) throw new Error(error.message);
+
+  const info = await listingInfo(listingId);
+  if (info) {
+    await emailUser({
+      userId: info.sellerId,
+      subject: `Changes needed - ${info.title}`,
+      heading: "Your listing needs a few changes",
+      lines: [
+        `We couldn't approve ${info.title} yet. Here's what needs changing:`,
+        reason.trim(),
+        "Make the changes, then submit the listing for review again.",
+      ],
+      buttonLabel: "Edit your listing",
+      path: `/account/listings/${listingId}/edit`,
+      label: "listing.rejected",
+    });
+  }
 
   revalidatePath("/(admin)/moderation/queue");
   revalidatePath("/account/listings");

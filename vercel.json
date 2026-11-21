@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/purge-verification-docs", "schedule": "0 15 * * *" }
+  ]
+}

@@ -1,3 +1,4 @@
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 import { NextResponse } from "next/server";
 import { estimateValueRange } from "@/lib/valuation";
 import {
@@ -7,6 +8,8 @@ import {
 } from "@/lib/valuation/fetchers";
 
 export async function POST(request: Request) {
+  const __vhLimited = await rateLimitResponse("valuation-lookup");
+  if (__vhLimited) return __vhLimited;
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;
