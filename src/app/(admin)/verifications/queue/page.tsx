@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -34,7 +34,7 @@ export default async function VerificationQueuePage() {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in");
+  if (!user) redirect("/signin");
 
   const { data: profile } = await supabase
     .from("profiles")

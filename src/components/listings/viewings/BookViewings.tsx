@@ -44,7 +44,7 @@ export default function BookViewings({
     setError(null);
     setSuccess(null);
     if (!signedIn) {
-      router.push(`/auth/sign-in?redirect=${encodeURIComponent(pathname)}`);
+      router.push(`/signin?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
     setPending({ sessionId, slot });

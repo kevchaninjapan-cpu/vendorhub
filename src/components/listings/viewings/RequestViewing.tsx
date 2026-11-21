@@ -70,7 +70,7 @@ export default function RequestViewing({
     setError(null);
     setSuccess(null);
     if (!signedIn) {
-      router.push(`/auth/sign-in?redirect=${encodeURIComponent(pathname)}`);
+      router.push(`/signin?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
     setShowForm(true);

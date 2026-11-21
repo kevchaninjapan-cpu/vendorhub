@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -29,7 +29,7 @@ export default async function VerifyPage() {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/account/verify");
+  if (!user) redirect("/signin?next=/account/verify");
 
   const { data: v } = await supabase
     .from("verifications")

@@ -93,7 +93,7 @@ export default function SignUpPage() {
       {/* Correct Link syntax below */}
       <p className="mt-6 text-sm text-gray-600">
         Already have an account?{" "}
-        <Link href="/auth/sign-in" className="text-indigo-600 hover:underline">
+        <Link href="/signin" className="text-indigo-600 hover:underline">
           Sign in
         </Link>
         .

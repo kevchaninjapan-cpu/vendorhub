@@ -37,7 +37,7 @@ export default async function EvaluationCard({
           using council CV, sales comparables, and regional indices.
         </p>
         <Link
-          href={`/sign-in?next=${encodeURIComponent(listingPath)}`}
+          href={`/signin?next=${encodeURIComponent(listingPath)}`}
           className="mt-2 inline-block text-xs underline"
         >
           Sign in to view

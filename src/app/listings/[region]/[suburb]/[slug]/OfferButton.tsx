@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export default function OfferButton({
 
   if (!isSignedIn) {
     return (
-      <a href={`/auth/sign-in?next=/listings/${listing.region?.toLowerCase()}/${listing.suburb?.toLowerCase().replace(/\s+/g, "-")}/${listing.slug}`}
+      <a href={`/signin?next=/listings/${listing.region?.toLowerCase()}/${listing.suburb?.toLowerCase().replace(/\s+/g, "-")}/${listing.slug}`}
          className="block w-full">
         <Button fullWidth>Sign in to make an offer</Button>
       </a>

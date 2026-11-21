@@ -44,7 +44,7 @@ export default async function proxy(request: NextRequest) {
   // ✅ Redirect unauthenticated users
   if (needsAuth && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign-in";
+    url.pathname = "/signin";
     url.searchParams.set("redirect", path);
     return NextResponse.redirect(url);
   }

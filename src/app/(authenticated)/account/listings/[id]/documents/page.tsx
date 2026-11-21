@@ -26,7 +26,7 @@ export default async function ListingDocumentsPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/auth/sign-in?redirect=${encodeURIComponent(`/account/listings/${id}/documents`)}`);
+    redirect(`/signin?redirect=${encodeURIComponent(`/account/listings/${id}/documents`)}`);
   }
 
   const { data: listing } = await supabase

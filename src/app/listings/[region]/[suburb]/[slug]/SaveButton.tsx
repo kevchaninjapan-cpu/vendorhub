@@ -35,7 +35,7 @@ export default function SaveButton({ listingId }: { listingId: string }) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        window.location.href = `/sign-in?next=${encodeURIComponent(window.location.pathname)}`;
+        window.location.href = `/signin?next=${encodeURIComponent(window.location.pathname)}`;
         return;
       }
       if (saved) {

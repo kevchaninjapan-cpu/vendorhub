@@ -34,7 +34,7 @@ async function getSupabase() {
 async function requireUser() {
   const supabase = await getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/signin");
   return { supabase, user };
 }
 

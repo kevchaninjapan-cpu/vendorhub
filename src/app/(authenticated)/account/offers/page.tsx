@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -35,7 +35,7 @@ export default async function OffersPage() {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/account/offers");
+  if (!user) redirect("/signin?next=/account/offers");
 
   const { data: buyerOffers } = await supabase
     .from("offers")

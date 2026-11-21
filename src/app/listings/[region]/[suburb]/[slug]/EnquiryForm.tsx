@@ -63,7 +63,7 @@ export default function EnquiryForm({ listingId }: { listingId: string }) {
       />
       {err && <p className="text-xs text-red-600">{err}</p>}
       {needsSignIn && (
-        <Link href={`/auth/sign-in?redirect=${encodeURIComponent(pathname)}`} className="text-xs underline">
+        <Link href={`/signin?redirect=${encodeURIComponent(pathname)}`} className="text-xs underline">
           Sign in
         </Link>
       )}

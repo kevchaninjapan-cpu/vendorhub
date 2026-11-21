@@ -23,7 +23,7 @@ export default function DocumentDownloadButton({
 
   if (access === "signin") {
     return (
-      <Link href={`/auth/sign-in?redirect=${encodeURIComponent(pathname)}`} className={linkClass}>
+      <Link href={`/signin?redirect=${encodeURIComponent(pathname)}`} className={linkClass}>
         Sign in to download
       </Link>
     );

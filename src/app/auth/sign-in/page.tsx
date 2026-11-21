@@ -1,129 +1,16 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+// Old sign-in address. Kept so existing links and emails still work.
+// Sends people to /signin and keeps ?redirect= / ?next=.
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
-/**
- * We render a small wrapper that provides Suspense for the part that
- * calls useSearchParams(). This satisfies Next 15/16 build rules.
- */
-export default function SignInPage() {
-  return (
-    <Suspense fallback={<main style={{ padding: 40 }}>Loading…</main>}>
-      <SignInForm />
-    </Suspense>
-  );
+export default async function OldSignInRedirect({ searchParams }: Props) {
+  const sp = await searchParams;
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (typeof value === "string") qs.set(key, value);
+    else if (Array.isArray(value) && value[0]) qs.set(key, value[0]);
+  }
+  const query = qs.toString();
+  redirect(query ? `/signin?${query}` : "/signin");
 }
-
-function SignInForm() {
-  const params = useSearchParams();
-  const redirectTo = params.get("redirect") || "/dashboard";
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handlePasswordSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setError(data?.error ?? "Sign-in failed.");
-        return;
-      }
-
-      window.location.href = redirectTo;
-    } catch (err: any) {
-      setError(err?.message ?? "Unexpected error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sendMagicLink = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otpType: "magic_link" }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setError(data?.error ?? "Could not send magic link.");
-      } else {
-        alert(data?.message ?? "Magic link sent. Check your email.");
-      }
-    } catch (err: any) {
-      setError(err?.message ?? "Unexpected error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <main
-      style={{ padding: 40, maxWidth: 420, margin: "0 auto", display: "grid", gap: 16 }}
-    >
-      <h1>Sign in</h1>
-
-      <form onSubmit={handlePasswordSignIn} style={{ display: "grid", gap: 12 }}>
-        <label style={{ fontWeight: 600 }}>
-          Email
-          <input
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-            required
-          />
-        </label>
-
-        <label style={{ fontWeight: 600 }}>
-          Password
-          <input
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-            required
-          />
-        </label>
-
-        {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: 10, background: "black", color: "white", borderRadius: 8 }}
-        >
-          {loading ? "Signing in…" : "Sign in"}
-        </button>
-
-        <button
-          type="button"
-          disabled={loading || !email}
-          onClick={sendMagicLink}
-          style={{ padding: 10, background: "#f3f4f6", borderRadius: 8 }}
-          title="Send a one-time magic link to your email"
-        >
-          {loading ? "Sending…" : "Send magic link"}
-        </button>
-      </form>
-    </main>
-  );
-}
-``

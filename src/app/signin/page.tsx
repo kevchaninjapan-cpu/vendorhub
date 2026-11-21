@@ -1,9 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+// The one sign-in page. Other sign-in addresses (/auth/sign-in, /sign-in)
+// redirect here and keep their ?redirect= or ?next= value.
+
+// Only allow addresses on VendorHub, so a crafted link can't send someone to
+// another website after they sign in.
+function safeNext(value: string | null): string {
+  if (!value) return "/account";
+  if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return "/account";
+  if (value.startsWith("/signin") || value.startsWith("/auth/sign-in") || value.startsWith("/sign-in")) {
+    return "/account";
+  }
+  return value;
+}
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-50" />}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
+  const params = useSearchParams();
+  const next = safeNext(params.get("redirect") ?? params.get("next"));
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,14 +50,13 @@ export default function SignInPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.ok) {
-        setError(data?.error ?? "Sign in failed. Please check your credentials.");
+        setError(data?.error ?? "Sign in failed. Please check your email and password.");
         return;
       }
 
-      // ✅ Redirect to onboarding router — it will send to correct page
-      window.location.href = "/account";
-    } catch (err: any) {
-      setError(err?.message ?? "Unexpected error.");
+      window.location.href = next;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -51,12 +76,8 @@ export default function SignInPage() {
 
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-            Welcome back
-          </h1>
-          <p className="mt-2 text-sm text-slate-900">
-            Sign in to your VendorHub account to continue.
-          </p>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
+          <p className="mt-2 text-sm text-slate-900">Sign in to your VendorHub account to continue.</p>
 
           <form onSubmit={handleSignIn} className="mt-8 grid gap-5">
             <label className="grid gap-2 text-xs font-semibold uppercase text-slate-900">
@@ -77,7 +98,7 @@ export default function SignInPage() {
               <input
                 type="password"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-normal text-slate-900 outline-none ring-blue-600 focus:ring-2"
-                placeholder="••••••••"
+                placeholder={"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -85,36 +106,25 @@ export default function SignInPage() {
               />
             </label>
 
-            {/* Forgot password link */}
-            <div className="flex justify-end -mt-2">
-              <Link
-                href="/signin/forgot-password"
-                className="text-xs font-semibold text-blue-600 hover:underline"
-              >
+            <div className="-mt-2 flex justify-end">
+              <Link href="/signin/forgot-password" className="text-xs font-semibold text-blue-600 hover:underline">
                 Forgot password?
               </Link>
             </div>
 
-            {error && (
-              <p className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                {error}
-              </p>
-            )}
+            {error && <p className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
               className="mt-2 inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Signing in\u2026" : "Sign in"}
             </button>
 
             <div className="text-center text-sm text-slate-900">
-              Don't have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="font-semibold text-blue-600 hover:underline"
-              >
+              Don&apos;t have an account?{" "}
+              <Link href="/auth/sign-up" className="font-semibold text-blue-600 hover:underline">
                 Create one
               </Link>
             </div>

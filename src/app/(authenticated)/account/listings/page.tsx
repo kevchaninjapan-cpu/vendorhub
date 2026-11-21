@@ -43,7 +43,7 @@ async function getData(): Promise<Listing[]> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/signin");
 
   const { data } = await supabase
     .from("listings")
