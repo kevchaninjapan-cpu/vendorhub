@@ -17,6 +17,7 @@ import {
   type ListingDocument,
   type PublicListingDocument,
 } from "./schema";
+import { fetchPublicDocuments } from "./public-read";
 
 const BUCKET = "listing-disclosures";
 const SIGNED_URL_TTL_SECONDS = 30 * 60; // 30 minutes
@@ -245,19 +246,9 @@ export async function listDocumentsForOwner(listingId: string): Promise<ListingD
 // because the owner policy would otherwise show them to a seller viewing
 // their own public listing page.
 export async function listDocumentsForBuyer(listingId: string): Promise<PublicListingDocument[]> {
-  const supabase = await getSupabase();
-
-  const { data, error } = await supabase
-    .from("listing_documents")
-    .select(
-      "id, listing_id, doc_type, visibility, file_name, file_size, mime_type, label, created_at, updated_at"
-    )
-    .eq("listing_id", listingId)
-    .neq("visibility", "private")
-    .order("doc_type");
-
-  if (error) throw new Error(error.message);
-  return (data ?? []) as PublicListingDocument[];
+  // Read with the server-only key so signed-in users cannot list every listing's
+  // documents (and their file paths) straight from the database.
+  return fetchPublicDocuments(listingId);
 }
 
 // Buyer download counts per document, for the seller. Counts distinct buyers
