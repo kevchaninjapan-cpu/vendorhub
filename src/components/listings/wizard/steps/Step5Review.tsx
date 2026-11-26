@@ -70,7 +70,7 @@ export function Step5Review({ draft, busy, onBack, onSubmit }: Props) {
           {draft.tender_close_at && (
             <p>
               Tender closes:{" "}
-              {new Date(draft.tender_close_at).toLocaleString("en-NZ")}
+              {new Date(draft.tender_close_at).toLocaleString("en-NZ", { timeZone: "Pacific/Auckland" })}
             </p>
           )}
           {draft.beo_amount != null && (
@@ -110,7 +110,7 @@ export function Step5Review({ draft, busy, onBack, onSubmit }: Props) {
             }`}
           >
             {readyToBuy
-              ? "✓ Ready to Buy badge will be shown"
+              ? "✓ Ticks done. The badge also needs a LIM and title uploaded under Documents"
               : "Add LIM + title + weathertightness to unlock Ready to Buy"}
           </p>
         </Card>

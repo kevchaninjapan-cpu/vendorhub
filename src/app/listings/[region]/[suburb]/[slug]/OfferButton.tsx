@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import OfferModal from "./OfferModal";
-import type { PublicListing } from "@/types/marketplace-public";
+import OfferModal, { type OfferListing } from "./OfferModal";
+
 
 export default function OfferButton({
   listing, isVerified, isSignedIn, isOwnListing,
 }: {
-  listing: PublicListing;
+  listing: OfferListing;
   isVerified: boolean;
   isSignedIn: boolean;
   isOwnListing: boolean;

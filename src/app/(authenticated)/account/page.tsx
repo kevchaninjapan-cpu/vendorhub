@@ -169,6 +169,21 @@ export default async function MyAccountPage() {
         </div>
       </section>
 
+      {listings > 0 ? (
+        <section className="mt-4 rounded-2xl border border-border/40 bg-surface p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Buyer pipeline</h2>
+              <p className="mt-1 text-xs text-muted">
+                Every buyer who has enquired, booked a viewing or made an offer on your listings.
+              </p>
+            </div>
+            <Link href="/account/pipeline" className="rounded-md border px-3 py-1.5 text-xs font-semibold">
+              Open pipeline &rarr;
+            </Link>
+          </div>
+        </section>
+      ) : null}
       <section className="mt-4 rounded-2xl border border-border/40 bg-surface p-5">
         <div className="flex items-center justify-between gap-3">
           <div>

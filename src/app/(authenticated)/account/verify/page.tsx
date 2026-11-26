@@ -64,7 +64,7 @@ export default async function VerifyPage() {
           <p className="font-semibold capitalize">Status: {verification.status}</p>
           {verification.status === "pending" && (
             <p className="mt-1 text-xs">
-              Submitted {new Date(verification.submitted_at!).toLocaleString("en-NZ")}.
+              Submitted {new Date(verification.submitted_at!).toLocaleString("en-NZ", { timeZone: "Pacific/Auckland" })}.
               We&apos;ll email you when review is complete.
             </p>
           )}
@@ -73,7 +73,7 @@ export default async function VerifyPage() {
           )}
           {verification.status === "approved" && verification.verified_at && (
             <p className="mt-1 text-xs">
-              Verified {new Date(verification.verified_at).toLocaleDateString("en-NZ")}.
+              Verified {new Date(verification.verified_at).toLocaleDateString("en-NZ", { timeZone: "Pacific/Auckland" })}.
             </p>
           )}
         </div>

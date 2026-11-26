@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -77,7 +77,7 @@ export function ListingWizard({ initial, mode = "create" }: Props) {
     setNotice(null);
     startSaveDraft(async () => {
       try {
-        await createOrUpdateDraft(draft);
+        const saved = await createOrUpdateDraft(draft); if (saved?.id) setDraft((d) => ({ ...d, id: saved.id }));
         setNotice("Draft saved.");
         setTimeout(() => setNotice(null), 3000);
       } catch (e: any) {

@@ -1,9 +1,20 @@
 import { ListingWizard } from "@/components/listings/wizard/ListingWizard";
+import type { ListingDraft } from "@/types/marketplace";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Create listing — VendorHub" };
+export const metadata: Metadata = { title: "Create listing \u2014 VendorHub" };
 
-export default function NewListingPage() {
+const PACKS = ["starter", "pro", "elite"] as const;
+
+export default async function NewListingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string }>;
+}) {
+  const { plan } = await searchParams;
+  const pack = PACKS.find((p) => p === plan);
+  const initial = pack ? ({ pack_tier: pack } as ListingDraft) : undefined;
+
   return (
     <div className="mx-auto max-w-3xl py-10">
       <header className="mb-6">
@@ -12,7 +23,7 @@ export default function NewListingPage() {
           Five quick steps. We&apos;ll save your progress automatically as a draft.
         </p>
       </header>
-      <ListingWizard />
+      <ListingWizard initial={initial} />
     </div>
   );
 }

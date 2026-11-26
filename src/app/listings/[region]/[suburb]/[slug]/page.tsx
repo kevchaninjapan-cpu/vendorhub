@@ -71,6 +71,16 @@ export default async function PublicListingPage({
   const { data: { user } } = await supabaseAuth.auth.getUser();
   const isSignedIn = !!user;
   const isOwnListing = user?.id === listing.member_id;
+    // Only what the offer button needs. The rest of the listing stays on the server.
+    const offerListing = {
+      id: listing.id,
+      region: listing.region,
+      suburb: listing.suburb,
+      slug: listing.slug,
+      headline: listing.headline,
+      formatted_address: listing.formatted_address,
+      asking_price: listing.asking_price,
+    };
 
   let isVerified = false;
   if (user) {
@@ -133,7 +143,7 @@ export default async function PublicListingPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
         <nav className="text-xs text-muted-foreground">
@@ -244,7 +254,7 @@ export default async function PublicListingPage({
               <h3 className="text-sm font-semibold">Make an offer</h3>
               <div className="mt-3">
                 <OfferButton
-                  listing={listing}
+                  listing={offerListing}
                   isSignedIn={isSignedIn}
                   isVerified={isVerified}
                   isOwnListing={isOwnListing}

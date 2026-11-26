@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
@@ -176,7 +176,7 @@ export function Step3Media({ draft, busy, onBack, onNext }: Props) {
   return (
     <section className="space-y-4">
       <header>
-        <h2 className="text-xl font-semibold">Step 3 â€” Photos</h2>
+        <h2 className="text-xl font-semibold">Step 3 — Photos</h2>
         <p className="text-sm text-slate-600">
           Add at least 4 photos. Click a photo to mark it as the cover image.
         </p>
@@ -211,19 +211,19 @@ export function Step3Media({ draft, busy, onBack, onNext }: Props) {
           <div className="flex flex-col items-center gap-2">
             <Spinner size="md" />
             <p className="text-sm font-medium text-slate-700">
-              Uploading {uploads.length} photo{uploads.length === 1 ? "" : "s"}â€¦
+              Uploading {uploads.length} photo{uploads.length === 1 ? "" : "s"}…
             </p>
           </div>
         ) : (
           <>
             <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm text-lg">
-              ðŸ“¸
+              📸
             </div>
             <p className="text-sm font-medium text-slate-700">
               Drop photos here or click to browse
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              JPG, PNG Â· Multiple files supported
+              JPG, PNG · Multiple files supported
             </p>
           </>
         )}
@@ -247,11 +247,11 @@ export function Step3Media({ draft, busy, onBack, onNext }: Props) {
         <div className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-xs">
           <span className="text-slate-700">
             <strong>{media.length}</strong> photo{media.length === 1 ? "" : "s"}
-            {needed > 0 && ` Â· ${needed} more needed`}
+            {needed > 0 && ` · ${needed} more needed`}
           </span>
           {canContinue && (
             <span className="font-medium text-emerald-700">
-              âœ“ Ready to continue
+              ✓ Ready to continue
             </span>
           )}
         </div>
@@ -277,7 +277,7 @@ export function Step3Media({ draft, busy, onBack, onNext }: Props) {
               )}
               {m.is_cover && (
                 <span className="absolute left-2 top-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                  â˜… Cover
+                  ★ Cover
                 </span>
               )}
               <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 transition group-hover:opacity-100">
@@ -306,12 +306,12 @@ export function Step3Media({ draft, busy, onBack, onNext }: Props) {
       {/* Nav */}
       <div className="flex items-center justify-between pt-4">
         <Button variant="ghost" onClick={onBack}>
-          â† Back
+          ← Back
         </Button>
         <Button
           onClick={onNext}
           disabled={!canContinue}
-          rightIcon={<span aria-hidden>â†’</span>}
+          rightIcon={<span aria-hidden>→</span>}
         >
           Continue to disclosures
         </Button>

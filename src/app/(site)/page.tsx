@@ -374,8 +374,8 @@ export default function Page() {
                     </p>
 
                     {[
-                      { label: "Elite Pack", price: 6995 },
-                      { label: "Pro Pack", price: 3495 },
+                      { label: "Elite Pack", price: 3990 },
+                      { label: "Pro Pack", price: 1990 },
                       { label: "Starter Pack", price: 649 },
                     ].map((p) => (
                       <label

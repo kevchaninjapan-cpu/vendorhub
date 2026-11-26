@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { submitOffer } from "@/lib/offers/client";
 import type { PublicListing } from "@/types/marketplace-public";
 
+export type OfferListing = Pick<
+  PublicListing,
+  "id" | "region" | "suburb" | "slug" | "headline" | "formatted_address" | "asking_price"
+>;
+
 export default function OfferModal({
   listing, onClose,
 }: {
-  listing: PublicListing;
+  listing: OfferListing;
   onClose: () => void;
 }) {
   const [amount, setAmount] = useState("");

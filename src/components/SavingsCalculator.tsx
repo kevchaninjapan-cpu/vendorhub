@@ -14,8 +14,8 @@ type Tier = {
 
 const TIERS: Tier[] = [
   { key: "starter", name: "Starter Pack", upfront: 649, monthly: 49, months: 2 },
-  { key: "pro", name: "Pro Pack", upfront: 3990, monthly: 99, months: 2 },
-  { key: "elite", name: "Elite Pack", upfront: 6495, monthly: 149, months: 2 },
+  { key: "pro", name: "Pro Pack", upfront: 1990, monthly: 99, months: 2 },
+  { key: "elite", name: "Elite Pack", upfront: 3990, monthly: 149, months: 2 },
 ];
 
 const nzd = new Intl.NumberFormat("en-NZ", {

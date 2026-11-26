@@ -49,3 +49,6 @@ next-env.d.ts
 .patch-backups/
 *.bak
 /install-*.ps1
+
+# installer backups and scripts
+/audit-*.ps1

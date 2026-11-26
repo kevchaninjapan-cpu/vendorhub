@@ -40,4 +40,3 @@ export async function supabaseServer() {
 
 // Default export to avoid import-style mismatch across the codebase
 export default supabaseServer;
-``

@@ -61,7 +61,24 @@ export const RATE_RULES = {
     windowSeconds: HOUR,
     message: "You've sent a lot of messages in a short time. Please wait a little and try again.",
   },
-} satisfies Record<string, Rule>;
+  "auth-sign-in": {
+    anon: 20,
+    user: 20,
+    windowSeconds: HOUR,
+    message: "Too many sign-in attempts. Please wait a little and try again.",
+  },
+  "auth-forgot": {
+    anon: 5,
+    user: 5,
+    windowSeconds: HOUR,
+    message: "Too many reset requests. Please wait a little and try again.",
+  },
+  "auth-reset": {
+    anon: 10,
+    user: 10,
+    windowSeconds: HOUR,
+    message: "Too many attempts. Please wait a little and try again.",
+  },} satisfies Record<string, Rule>;
 
 export type RateBucket = keyof typeof RATE_RULES;
 

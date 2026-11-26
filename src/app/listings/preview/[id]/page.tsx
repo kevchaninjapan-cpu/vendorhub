@@ -54,4 +54,3 @@ export default async function PreviewRedirect({
 
   redirect(`/listings/${regionSlug}/${suburbSlug}/${listing.slug}?preview=1`);
 }
-``

@@ -38,7 +38,7 @@ export default function BookViewings({
     return m;
   }, [myBookings]);
 
-  const now = Date.now();
+  const [now] = useState(() => Date.now());
 
   function start(sessionId: string, slot: string | null) {
     setError(null);

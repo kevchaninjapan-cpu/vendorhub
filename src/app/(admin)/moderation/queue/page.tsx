@@ -160,7 +160,7 @@ export default async function ModerationQueuePage() {
                     <Fact label="Photos" value={media.length} />
                     <Fact
                       label="Submitted"
-                      value={new Date(r.updated_at).toLocaleDateString("en-NZ")}
+                      value={new Date(r.updated_at).toLocaleDateString("en-NZ", { timeZone: "Pacific/Auckland" })}
                     />
                   </div>
 

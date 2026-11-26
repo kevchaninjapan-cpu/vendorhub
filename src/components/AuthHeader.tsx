@@ -23,7 +23,7 @@ export default function AuthHeader({ unreadMessages = 0 }: { unreadMessages?: nu
 
         {/* Right: Nav links */}
         <nav className="flex items-center gap-6">
-          <Link href="/listings" className={linkClass("/listings")}>
+          <Link href="/account/listings" className={linkClass("/account/listings")}>
             My Listings
           </Link>
           <Link href="/account/messages" className={`${linkClass("/account/messages")} flex items-center gap-1.5`}>

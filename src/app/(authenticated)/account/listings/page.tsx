@@ -140,7 +140,7 @@ export default async function MyListingsPage({
                       : "—"}
                   </Td>
                   <Td className="text-xs text-muted-foreground">
-                    {new Date(l.updated_at).toLocaleDateString("en-NZ")}
+                    {new Date(l.updated_at).toLocaleDateString("en-NZ", { timeZone: "Pacific/Auckland" })}
                   </Td>
                   <Td>
                     <Link

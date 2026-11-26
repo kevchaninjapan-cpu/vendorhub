@@ -37,7 +37,7 @@ export default function PricingPage() {
           </CardContent>
 
           <CardFooter>
-            <Link href="/app">
+            <Link href="/auth/sign-up">
               <Button className="w-full">Get started</Button>
             </Link>
           </CardFooter>
@@ -54,12 +54,12 @@ export default function PricingPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="text-3xl font-semibold">$3,990</div>
+            <div className="text-3xl font-semibold">$1,990</div>
             <div className="text-sm text-slate-900">+ $99/mo</div>
           </CardContent>
 
           <CardFooter>
-            <Link href="/app">
+            <Link href="/auth/sign-up">
               <Button className="w-full">Get started</Button>
             </Link>
           </CardFooter>
@@ -73,12 +73,12 @@ export default function PricingPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="text-3xl font-semibold">$6,495</div>
+            <div className="text-3xl font-semibold">$3,990</div>
             <div className="text-sm text-slate-900">+ $149/mo</div>
           </CardContent>
 
           <CardFooter>
-            <Link href="/app">
+            <Link href="/auth/sign-up">
               <Button className="w-full">Get started</Button>
             </Link>
           </CardFooter>
@@ -86,11 +86,10 @@ export default function PricingPage() {
       </div>
 
       <div className="pt-4 text-center">
-        <Link href="/app">
+        <Link href="/auth/sign-up">
           <Button >Start listing</Button>
         </Link>
       </div>
     </div>
   );
 }
-``

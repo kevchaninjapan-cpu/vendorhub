@@ -1,86 +1,30 @@
 import { NextResponse, type NextRequest } from "next/server";
 import supabaseServer from "@/lib/supabaseServer";
+import { rateLimitResponse } from "@/lib/security/rate-limit";
 
-type SignInBody = {
-  email?: string;
-  password?: string;
-  otpType?: "magic_link";
-};
-
-function baseUrl(req: NextRequest) {
-  // Prefer explicit site URL, then request origin, then localhost
-  const env =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_VERCEL_URL ||
-    "";
-  if (env) {
-    // NEXT_PUBLIC_VERCEL_URL may be like "myapp.vercel.app" (no scheme)
-    if (env.startsWith("http://") || env.startsWith("https://")) return env;
-    return `https://${env}`;
-  }
-
-  const origin = req.nextUrl?.origin;
-  return origin || "http://localhost:3000";
-}
-
+// Password sign-in. Rate limited per visitor to slow down password guessing.
 export async function POST(req: NextRequest) {
+  const limited = await rateLimitResponse("auth-sign-in");
+  if (limited) return limited;
+
   try {
-    const body = (await req.json().catch(() => ({}))) as SignInBody;
+    const body = (await req.json().catch(() => ({}))) as { email?: string; password?: string };
     const email = body.email?.trim();
     const password = body.password;
-    const otpType = body.otpType;
 
-    // ✅ Uses your shared helper
+    if (!email || !password) {
+      return NextResponse.json({ ok: false, error: "Enter your email and password." }, { status: 400 });
+    }
+
     const supabase = await supabaseServer();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    // Password sign-in
-    if (email && password) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return NextResponse.json(
-          { ok: false, error: error.message },
-          { status: 401 }
-        );
-      }
-
-      return NextResponse.json({ ok: true }, { status: 200 });
+    if (error) {
+      return NextResponse.json({ ok: false, error: "That email and password don't match." }, { status: 401 });
     }
-
-    // Magic link sign-in
-    if (email && otpType === "magic_link") {
-      const redirectTo = `${baseUrl(req)}/app`; // ✅ VendorHub app area (not /dashboard)
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo },
-      });
-
-      if (error) {
-        return NextResponse.json(
-          { ok: false, error: error.message },
-          { status: 400 }
-        );
-      }
-
-      return NextResponse.json(
-        { ok: true, message: "Magic link sent." },
-        { status: 200 }
-      );
-    }
-
-    return NextResponse.json(
-      { ok: false, error: "Invalid payload." },
-      { status: 400 }
-    );
-  } catch (err: any) {
-    console.error("[SIGN_IN_FATAL]", err);
-    return NextResponse.json(
-      { ok: false, error: err?.message ?? "Unexpected error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch (err) {
+    console.error("[SIGN_IN]", err);
+    return NextResponse.json({ ok: false, error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

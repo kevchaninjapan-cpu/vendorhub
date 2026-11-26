@@ -78,7 +78,7 @@ export default async function VerificationQueuePage() {
           <article key={r.id} className="rounded-md border bg-white p-4">
             <div className="flex justify-between text-xs text-slate-500">
               <span>User: {r.user_id.slice(0, 8)}…</span>
-              <span>Submitted: {new Date(r.submitted_at ?? r.created_at).toLocaleString("en-NZ")}</span>
+              <span>Submitted: {new Date(r.submitted_at ?? r.created_at).toLocaleString("en-NZ", { timeZone: "Pacific/Auckland" })}</span>
             </div>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-3">

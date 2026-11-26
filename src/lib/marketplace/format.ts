@@ -26,7 +26,7 @@ export function priceLabel(args: {
       return args.beoAmount != null ? `BEO ${nzd(args.beoAmount)}` : "Buyer enquiry over";
     case "tender":
       return args.tenderCloseAt
-        ? `Tender closes ${new Date(args.tenderCloseAt).toLocaleDateString("en-NZ")}`
+        ? `Tender closes ${new Date(args.tenderCloseAt).toLocaleDateString("en-NZ", { timeZone: "Pacific/Auckland" })}`
         : "Tender";
     case "negotiation":
     default:

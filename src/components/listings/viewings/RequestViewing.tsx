@@ -37,6 +37,7 @@ export default function RequestViewing({
   const router = useRouter();
   const pathname = usePathname();
   const today = nzToday();
+  const [nowMs] = useState(() => Date.now());
 
   const r = state.request;
   const isOpen = Boolean(r && isOpenRequest(r.status));
@@ -44,7 +45,7 @@ export default function RequestViewing({
     r &&
       r.status === "confirmed" &&
       r.proposed_starts_at &&
-      new Date(r.proposed_starts_at).getTime() > Date.now()
+      new Date(r.proposed_starts_at).getTime() > nowMs
   );
 
   const [showForm, setShowForm] = useState(false);

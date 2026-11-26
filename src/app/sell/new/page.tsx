@@ -84,7 +84,7 @@ const ADD_ONS = [
 
 export default function SellNewPage() {
   const [selected, setSelected] = React.useState<Plan>("pro");
-  const nextHref = `/listings/create?plan=${selected}`;
+  const nextHref = `/account/listings/new?plan=${selected}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

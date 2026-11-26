@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -99,7 +99,7 @@ export default function SearchView({
           <h1 className="text-2xl font-semibold tracking-tight">
             {loading ? (
               <span className="inline-flex items-center gap-2">
-                <Spinner /> Searchingâ€¦
+                <Spinner /> Searching…
               </span>
             ) : (
               <>
@@ -211,7 +211,7 @@ function Filters({
     <div className="flex flex-wrap items-center gap-2 rounded-md border bg-white p-2 text-xs shadow-sm">
       <input
         defaultValue={filters.q ?? ""}
-        placeholder="ðŸ” Search address, suburb, keywordâ€¦"
+        placeholder="🔍 Search address, suburb, keyword…"
         onChange={(e) => onChange({ q: e.target.value || undefined })}
         className="min-w-[220px] flex-1 rounded border border-slate-300 px-2 py-1.5 focus:border-emerald-500 focus:outline-none"
       />
@@ -330,7 +330,7 @@ function EmptyState({
   return (
     <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-10 text-center">
       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl shadow-sm">
-        ðŸ¡
+        🏡
       </div>
       <h3 className="text-base font-semibold text-slate-900">
         No properties found
@@ -338,7 +338,7 @@ function EmptyState({
       <p className="mt-1 text-sm text-slate-600">
         {hasFilters
           ? "Try widening your filters or clearing them."
-          : "Check back soon â€” new listings arrive daily."}
+          : "Check back soon — new listings arrive daily."}
       </p>
       {hasFilters && (
         <div className="mt-4">
@@ -369,7 +369,7 @@ function Pagination({
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
       >
-        â† Prev
+        ← Prev
       </Button>
       <span className="text-sm text-slate-600">
         Page <strong>{page}</strong> of <strong>{pageCount}</strong>
@@ -380,7 +380,7 @@ function Pagination({
         disabled={page >= pageCount}
         onClick={() => onChange(page + 1)}
       >
-        Next â†’
+        Next →
       </Button>
     </div>
   );

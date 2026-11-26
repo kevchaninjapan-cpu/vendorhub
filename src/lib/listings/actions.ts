@@ -322,12 +322,6 @@ export async function submitForReview(listingId: string, payload: ListingDraft) 
     .eq("member_id", user.id);
   if (error) throw new Error(error.message);
 
-  await supabase.from("audit_log").insert({
-    actor_id: user.id,
-    action: "submit_for_review",
-    target_type: "listing",
-    target_id: listingId,
-  });
 
   revalidatePath("/account/listings");
   return { ok: true };
