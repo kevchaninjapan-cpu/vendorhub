@@ -32,13 +32,13 @@ export const RATE_RULES = {
     message: "You've reached today's limit of free estimates. Sign in for more, or try again tomorrow.",
   },
   "valuation-search": {
-    anon: 100,
+    anon: 60,
     user: 600,
     windowSeconds: HOUR,
     message: "Too many address searches. Please wait a little and try again.",
   },
   "valuation-resolve": {
-    anon: 100,
+    anon: 30,
     user: 600,
     windowSeconds: HOUR,
     message: "Too many address lookups. Please wait a little and try again.",
